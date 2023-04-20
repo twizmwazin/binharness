@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=67", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "binharness"
+description = "A framework to analyze programs running in environments"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+authors = [{name = "Kevin Phoenix", email = "kevin@kphoenix.us"}]
+maintainers = [{name = "Kevin Phoenix", email = "kevin@kphoenix.us"}]
+dependencies = []
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    "black>=23.3.0",
+    "coverage[toml]>=7.2.3",
+    "mypy>=1.2.0",
+    "pre-commit>=3.2.2",
+    "pytest>=7.3.1",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.0.262",
+]
+
+[project.urls]
+homepage = "https://github.com/twizmwazin/binharness"
+repository = "https://github.com/twizmwazin/binarness.git"
+
+[tool.setuptools.dynamic]
+version = {attr = "binharness.__version__"}
+
+[tool.setuptools.packages.find]
+exclude = ["binharness.tests*"]
+
+[tool.pytest.ini_options]
+addopts = "--tb=native --cov=binharness --cov-report lcov:.lcov --cov-report term-missing"
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]
+
+[tool.ruff]
+select = ["ALL"]
+ignore = [
+    "COM",
+    "D203",
+    "D213",
+]
+ignore-init-module-imports = true
+
+[tool.ruff.isort]
+required-imports = ["from __future__ import annotations"]
+
+[tool.ruff.per-file-ignores]
+"binharness/tests/*" = [
+    "D",
+    "S101",
+]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+warn_redundant_casts = true
