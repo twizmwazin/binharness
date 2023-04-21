@@ -53,6 +53,7 @@ ignore = [
     "COM",
     "D203",
     "D213",
+    "S603",
 ]
 ignore-init-module-imports = true
 

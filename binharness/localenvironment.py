@@ -1,9 +1,11 @@
 """binharness.localenvironment - A local environment."""
 from __future__ import annotations
 
-import pathlib
 import shutil
+import subprocess
 import tempfile
+from pathlib import Path
+from typing import IO, Sequence
 
 from binharness.environment import Environment
 from binharness.process import Process
@@ -17,7 +19,10 @@ class LocalEnvironment(Environment):
         super().__init__()
 
     def run_command(
-        self: LocalEnvironment, *args, **kwargs  # noqa: ANN002,ANN003
+        self: LocalEnvironment,
+        *args: Path | str | Sequence[Path | str],
+        env: dict[str, str] | None = None,
+        cwd: Path | None = None,
     ) -> Process:
         """Run a command in the environment.
 
@@ -25,11 +30,19 @@ class LocalEnvironment(Environment):
         subprocess is started with `subprocess.Popen` and the arguments are
         passed directly to that function.
         """
-        return Process(*args, **kwargs)
+        # Flatten the arguments.
+        flattened_args = []
+        for arg in args:
+            if isinstance(arg, (str, Path)):
+                flattened_args.append(str(arg))
+            else:
+                flattened_args.extend(str(a) for a in arg)
+
+        return LocalProcess(self, flattened_args, env=env, cwd=cwd)
 
     def inject_files(
         self: LocalEnvironment,
-        files: list[tuple[pathlib.Path, pathlib.Path]],
+        files: list[tuple[Path, Path]],
     ) -> None:
         """Inject files into the environment.
 
@@ -42,7 +55,7 @@ class LocalEnvironment(Environment):
 
     def retrieve_files(
         self: LocalEnvironment,
-        files: list[tuple[pathlib.Path, pathlib.Path]],
+        files: list[tuple[Path, Path]],
     ) -> None:
         """Retrieve files from the environment.
 
@@ -53,6 +66,82 @@ class LocalEnvironment(Environment):
         for file in files:
             shutil.copy(file[0], file[1])
 
-    def get_tempdir(self: LocalEnvironment) -> pathlib.Path:
+    def get_tempdir(self: LocalEnvironment) -> Path:
         """Get a Path for a temporary directory."""
-        return pathlib.Path(tempfile.gettempdir())
+        return Path(tempfile.gettempdir())
+
+
+class LocalProcess(Process):
+    """A process running in a local environment."""
+
+    popen: subprocess.Popen
+
+    def __init__(
+        self: LocalProcess,
+        environment: Environment,
+        args: Sequence[str],
+        env: dict[str, str] | None = None,
+        cwd: Path | None = None,
+    ) -> None:
+        """Create a LocalProcess."""
+        super().__init__(environment, args, env=env, cwd=cwd)
+        self.popen = subprocess.Popen(
+            self.args,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=env,
+            cwd=cwd,
+        )
+
+    @property
+    def stdin(self: LocalProcess) -> IO[bytes]:
+        """Get the standard input stream of the process."""
+        if self.popen.stdin is None:
+            raise ValueError  # pragma: no cover
+        return self.popen.stdin
+
+    @property
+    def stdout(self: LocalProcess) -> IO[bytes]:
+        """Get the standard output stream of the process."""
+        if self.popen.stdout is None:
+            raise ValueError  # pragma: no cover
+        return self.popen.stdout
+
+    @property
+    def stderr(self: LocalProcess) -> IO[bytes]:
+        """Get the standard error stream of the process."""
+        if self.popen.stderr is None:
+            raise ValueError  # pragma: no cover
+        return self.popen.stderr
+
+    @property
+    def returncode(self: LocalProcess) -> int | None:
+        """Get the process' exit code."""
+        return self.popen.returncode
+
+    def poll(self: LocalProcess) -> int | None:
+        """Return the process' exit code if it has terminated, or None."""
+        return self.popen.poll()
+
+    def wait(self: LocalProcess) -> int:
+        """Wait for the process to terminate and return its exit code."""
+        return self.popen.wait()
+
+    def communicate(
+        self: LocalProcess, input_: bytes | None = None
+    ) -> tuple[bytes, bytes]:
+        """Send input to the process and return its output and error streams."""
+        return self.popen.communicate(input_)
+
+    def send_signal(self: LocalProcess, signal: int) -> None:
+        """Send a signal to the process."""
+        self.popen.send_signal(signal)
+
+    def terminate(self: LocalProcess) -> None:
+        """Terminate the process."""
+        self.popen.terminate()
+
+    def kill(self: LocalProcess) -> None:
+        """Kill the process."""
+        self.popen.kill()

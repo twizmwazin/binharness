@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Sequence
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -27,8 +27,9 @@ class Environment(ABC):
     @abstractmethod
     def run_command(
         self: Environment,
-        *args,  # noqa: ANN002
-        **kwargs,  # noqa: ANN003
+        *args: Path | str | Sequence[Path | str],
+        env: dict[str, str] | None = None,
+        cwd: Path | None = None,
     ) -> Process:
         """Run a command in the environment.
 
