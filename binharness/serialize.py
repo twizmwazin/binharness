@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 from binharness.target import Target
 
 if TYPE_CHECKING:
-    from binharness.environment import Envirnoment
+    from binharness.environment import Environment
 
 
 class TargetImportError(Exception):
@@ -44,7 +44,7 @@ def export_target(target: Target, export_path: Path) -> None:
             tar.add(file, arcname=file.name)
 
 
-def import_target(environment: Envirnoment, import_path: Path) -> Target:
+def import_target(environment: Environment, import_path: Path) -> Target:
     """Install a PortableTarget into the environment.
 
     This function is the inverse of export_target.

@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from binharness import Envirnoment, Process
+    from binharness import Environment, Process
 
 
 class InjectionError(Exception):
@@ -30,7 +30,7 @@ class Injection:
     host_path: Path
     env_path: Path | None
 
-    _environment: Envirnoment | None
+    _environment: Environment | None
 
     def __init__(
         self: Injection, host_path: Path, env_path: Path | None = None
@@ -40,7 +40,7 @@ class Injection:
         self.env_path = env_path
         self._environment = None
 
-    def install(self: Injection, environment: Envirnoment) -> None:
+    def install(self: Injection, environment: Environment) -> None:
         """Install the injection into an environment."""
         if self._environment is not None:
             raise InjectionAlreadyInstalledError
@@ -104,7 +104,7 @@ class BusyboxInjection(ExecutableInjection):
         """Create a BusyboxInjection."""
         super().__init__(Path("busybox"), self.BUSYBOX_PATH, None)
 
-    def install(self: BusyboxInjection, environment: Envirnoment) -> None:
+    def install(self: BusyboxInjection, environment: Environment) -> None:
         """Install the injection into an environment."""
         self.env_path = environment.get_tempdir()
         super().install(environment)

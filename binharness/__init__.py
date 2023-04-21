@@ -3,7 +3,7 @@ from __future__ import annotations
 
 __version__ = "0.1.0dev0"
 
-from binharness.environment import Envirnoment
+from binharness.environment import Environment
 from binharness.executor import (
     BusyboxShellExecutor,
     Executor,
@@ -28,7 +28,7 @@ from binharness.target import Target
 __all__ = [
     "BusyboxInjection",
     "BusyboxShellExecutor",
-    "Envirnoment",
+    "Environment",
     "ExecutableInjection",
     "Executor",
     "ExecutorEnvironmentMismatchError",

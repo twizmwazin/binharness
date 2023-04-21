@@ -6,13 +6,13 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from binharness import Envirnoment
+    from binharness import Environment
 
 
 class Target:
     """A Target is a representation of a target in an environment."""
 
-    environment: Envirnoment
+    environment: Environment
     main_binary: Path
     extra_binaries: list[Path]
     args: list[str]
@@ -20,7 +20,7 @@ class Target:
 
     def __init__(  # noqa: PLR0913
         self: Target,
-        environment: Envirnoment,
+        environment: Environment,
         main_binary: Path,
         extra_binaries: list[Path] | None = None,
         args: list[str] | None = None,
