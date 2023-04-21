@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from binharness import BusyboxInjection, Process
 
 
-class Envirnoment(ABC):
+class Environment(ABC):
     """An environment is a place where a target can run.
 
     An environment provides the base API for creating and invoking targets.
@@ -20,13 +20,13 @@ class Envirnoment(ABC):
 
     busybox_injection: BusyboxInjection | None
 
-    def __init__(self: Envirnoment) -> None:
+    def __init__(self: Environment) -> None:
         """Create an Environment."""
         self.busybox_injection = None
 
     @abstractmethod
     def run_command(
-        self: Envirnoment,
+        self: Environment,
         *args,  # noqa: ANN002
         **kwargs,  # noqa: ANN003
     ) -> Process:
@@ -39,7 +39,7 @@ class Envirnoment(ABC):
 
     @abstractmethod
     def inject_files(
-        self: Envirnoment,
+        self: Environment,
         files: list[tuple[Path, Path]],
     ) -> None:
         """Inject files into the environment.
@@ -51,7 +51,7 @@ class Envirnoment(ABC):
 
     @abstractmethod
     def retrieve_files(
-        self: Envirnoment,
+        self: Environment,
         files: list[tuple[Path, Path]],
     ) -> None:
         """Retrieve files from the environment.
@@ -63,6 +63,6 @@ class Envirnoment(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_tempdir(self: Envirnoment) -> Path:
+    def get_tempdir(self: Environment) -> Path:
         """Get a Path for a temporary directory."""
         raise NotImplementedError

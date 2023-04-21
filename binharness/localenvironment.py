@@ -5,11 +5,11 @@ import pathlib
 import shutil
 import tempfile
 
-from binharness.environment import Envirnoment
+from binharness.environment import Environment
 from binharness.process import Process
 
 
-class LocalEnvironment(Envirnoment):
+class LocalEnvironment(Environment):
     """A local environment is the environment local to where binharness is run."""
 
     def __init__(self: LocalEnvironment) -> None:
