@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 
 import pytest
@@ -68,8 +67,6 @@ def test_busybox_injection() -> None:
         "head",
         "-n",
         "1",
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
     )
     assert proc.stdin is not None
     stdout, _ = proc.communicate(b"one\ntwo\n")

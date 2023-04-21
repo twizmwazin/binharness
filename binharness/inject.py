@@ -1,7 +1,6 @@
 """binharness.inject - Inject files into an environment."""
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -81,14 +80,18 @@ class ExecutableInjection(Injection):
         self.executable = executable
 
     def run(
-        self: ExecutableInjection, *args, **kwargs  # noqa: ANN002, ANN003
+        self: ExecutableInjection,
+        *args: str,
+        env: dict[str, str] | None = None,
+        cwd: Path | None = None,
     ) -> Process:
         """Run the injection in the environment."""
         if self._environment is None or self.env_path is None:
             raise InjectionNotInstalledError
         return self._environment.run_command(
             [self.env_path / self.executable, *args],
-            **kwargs,
+            env=env,
+            cwd=cwd,
         )
 
 
@@ -112,9 +115,10 @@ class BusyboxInjection(ExecutableInjection):
 
     def mktemp(self: BusyboxInjection, directory: bool = False) -> Path:  # noqa: FBT
         """Run mktemp in the environment and returns the Path created."""
-        if directory:
-            proc = self.run("mktemp", "-d", stdout=subprocess.PIPE)
-        else:
-            proc = self.run("mktemp", stdout=subprocess.PIPE)
+        proc = self.run("mktemp", "-d") if directory else self.run("mktemp")
         stdout, _ = proc.communicate()
         return Path(stdout.decode().strip())
+
+    def shell(self: BusyboxInjection, command: str) -> Process:
+        """Run a shell in the environment."""
+        return self.run("sh", "-c", command)
