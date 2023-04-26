@@ -119,6 +119,8 @@ class BusyboxInjection(ExecutableInjection):
         stdout, _ = proc.communicate()
         return Path(stdout.decode().strip())
 
-    def shell(self: BusyboxInjection, command: str) -> Process:
+    def shell(
+        self: BusyboxInjection, command: str, env: dict[str, str] | None = None
+    ) -> Process:
         """Run a shell in the environment."""
-        return self.run("sh", "-c", command)
+        return self.run("sh", "-c", command, env=env)
