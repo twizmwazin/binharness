@@ -5,10 +5,11 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import IO, Sequence
+from typing import Sequence
 
 from binharness.environment import Environment
-from binharness.process import Process
+from binharness.process import IO, Process
+from binharness.util import normalize_args
 
 
 class LocalEnvironment(Environment):
@@ -30,15 +31,7 @@ class LocalEnvironment(Environment):
         subprocess is started with `subprocess.Popen` and the arguments are
         passed directly to that function.
         """
-        # Flatten the arguments.
-        flattened_args = []
-        for arg in args:
-            if isinstance(arg, (str, Path)):
-                flattened_args.append(str(arg))
-            else:
-                flattened_args.extend(str(a) for a in arg)
-
-        return LocalProcess(self, flattened_args, env=env, cwd=cwd)
+        return LocalProcess(self, normalize_args(*args), env=env, cwd=cwd)
 
     def inject_files(
         self: LocalEnvironment,
@@ -124,24 +117,6 @@ class LocalProcess(Process):
         """Return the process' exit code if it has terminated, or None."""
         return self.popen.poll()
 
-    def wait(self: LocalProcess) -> int:
+    def wait(self: LocalProcess, timeout: float | None = None) -> int:
         """Wait for the process to terminate and return its exit code."""
-        return self.popen.wait()
-
-    def communicate(
-        self: LocalProcess, input_: bytes | None = None
-    ) -> tuple[bytes, bytes]:
-        """Send input to the process and return its output and error streams."""
-        return self.popen.communicate(input_)
-
-    def send_signal(self: LocalProcess, signal: int) -> None:
-        """Send a signal to the process."""
-        self.popen.send_signal(signal)
-
-    def terminate(self: LocalProcess) -> None:
-        """Terminate the process."""
-        self.popen.terminate()
-
-    def kill(self: LocalProcess) -> None:
-        """Kill the process."""
-        self.popen.kill()
+        return self.popen.wait(timeout=timeout)

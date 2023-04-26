@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pathlib
-import signal
 import tempfile
 
 from binharness.inject import BusyboxInjection
@@ -56,27 +55,10 @@ def test_process_poll() -> None:
     env = LocalEnvironment()
     busybox = BusyboxInjection()
     busybox.install(env)
-    proc = busybox.run("yes")
+    proc = busybox.run("head")
     assert proc.poll() is None
-    proc.terminate()
+    proc.stdin.write(b"hello\n")
+    proc.stdin.close()
     proc.wait()
     assert proc.poll() is not None
-
-
-def test_process_send_signal() -> None:
-    env = LocalEnvironment()
-    busybox = BusyboxInjection()
-    busybox.install(env)
-    proc = busybox.run("yes")
-    proc.send_signal(signal.SIGTERM)
-    proc.wait()
-    assert proc.poll() == -signal.SIGTERM
-
-
-def test_process_kill() -> None:
-    env = LocalEnvironment()
-    busybox = BusyboxInjection()
-    busybox.install(env)
-    proc = busybox.run("yes")
-    proc.kill()
-    assert proc.wait() == -signal.SIGKILL
+    assert proc.stdout.read() == b"hello\n"
