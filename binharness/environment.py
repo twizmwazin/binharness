@@ -4,10 +4,12 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Sequence
 
+from binharness import BusyboxInjection
+
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from binharness import BusyboxInjection, Process
+    from binharness import Process
 
 
 class Environment(ABC):
@@ -67,3 +69,10 @@ class Environment(ABC):
     def get_tempdir(self: Environment) -> Path:
         """Get a Path for a temporary directory."""
         raise NotImplementedError
+
+    def get_busybox_injection(self: Environment) -> BusyboxInjection:
+        """Get the Busybox injection for this environment."""
+        if self.busybox_injection is None:
+            self.busybox_injection = BusyboxInjection()
+            self.busybox_injection.install(self)
+        return self.busybox_injection

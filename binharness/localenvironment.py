@@ -44,7 +44,10 @@ class LocalEnvironment(Environment):
         """
         for file in files:
             file[1].parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(file[0], file[1])
+            if file[0].is_dir():
+                shutil.copytree(file[0], file[1], dirs_exist_ok=True)
+            else:
+                shutil.copy2(file[0], file[1])
 
     def retrieve_files(
         self: LocalEnvironment,
