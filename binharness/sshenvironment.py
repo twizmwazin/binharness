@@ -220,7 +220,8 @@ def _make_dirs(sftp: paramiko.SFTPClient, path: Path) -> None:
     while len(path.parts) > 1:
         try:
             sftp.mkdir(str(working_path))
-        except PermissionError as err:  # No permission to create directory
+        except PermissionError as err:  # noqa: PERF203
+            # No permission to create directory
             raise SSHPermissionError from err
         except FileNotFoundError:  # Parent directory does not exist
             _make_dirs(sftp, working_path.parent)

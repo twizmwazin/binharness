@@ -113,7 +113,9 @@ class BusyboxInjection(ExecutableInjection):
         super().install(environment)
         environment.busybox_injection = self
 
-    def mktemp(self: BusyboxInjection, directory: bool = False) -> Path:  # noqa: FBT
+    def mktemp(
+        self: BusyboxInjection, directory: bool = False  # noqa: FBT001, FBT002
+    ) -> Path:
         """Run mktemp in the environment and returns the Path created."""
         proc = self.run("mktemp", "-d") if directory else self.run("mktemp")
         stdout, _ = proc.communicate()
