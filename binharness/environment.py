@@ -10,6 +10,10 @@ if TYPE_CHECKING:
     from binharness import BusyboxInjection, Process
 
 
+class BusyboxInjectionNotInstalledError(Exception):
+    """BusyBox is not installed in the environment."""
+
+
 class Environment(ABC):
     """An environment is a place where a target can run.
 
@@ -18,11 +22,26 @@ class Environment(ABC):
     well as running commands.
     """
 
-    busybox_injection: BusyboxInjection | None
+    _busybox_injection: BusyboxInjection | None
 
     def __init__(self: Environment) -> None:
         """Create an Environment."""
-        self.busybox_injection = None
+        self._busybox_injection = None
+
+    @property
+    def busybox_injection(self: Environment) -> BusyboxInjection:
+        """Return the BusyboxInjection for the environment."""
+        if self._busybox_injection is None:
+            raise BusyboxInjectionNotInstalledError
+        return self._busybox_injection
+
+    @busybox_injection.setter
+    def busybox_injection(
+        self: Environment,
+        busybox_injection: BusyboxInjection,
+    ) -> None:
+        """Set the BusyboxInjection for the environment."""
+        self._busybox_injection = busybox_injection
 
     @abstractmethod
     def run_command(

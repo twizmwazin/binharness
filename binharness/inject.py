@@ -4,6 +4,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from binharness.environment import BusyboxInjectionNotInstalledError
+
 if TYPE_CHECKING:
     from binharness import Environment, Process
 
@@ -44,11 +46,11 @@ class Injection:
         if self._environment is not None:
             raise InjectionAlreadyInstalledError
         if self.env_path is None:
-            if environment.busybox_injection is None:
+            try:
+                bb_injection = environment.busybox_injection
+            except BusyboxInjectionNotInstalledError:
                 bb_injection = BusyboxInjection()
                 bb_injection.install(environment)
-            else:
-                bb_injection = environment.busybox_injection
             self.env_path = bb_injection.mktemp(directory=True)
 
         environment.inject_files([(self.host_path, self.env_path)])
@@ -57,6 +59,13 @@ class Injection:
     def is_installed(self: Injection) -> bool:
         """Return True if the injection is installed."""
         return self._environment is not None
+
+    @property
+    def environment(self: Injection) -> Environment:
+        """Return the environment the injection is installed in."""
+        if self._environment is None:
+            raise InjectionNotInstalledError
+        return self._environment
 
 
 class ExecutableInjection(Injection):
@@ -126,3 +135,7 @@ class BusyboxInjection(ExecutableInjection):
     ) -> Process:
         """Run a shell in the environment."""
         return self.run("sh", "-c", command, env=env)
+
+    def cat(self: BusyboxInjection, path: Path) -> Process:
+        """Run cat in the environment."""
+        return self.run("cat", str(path))
