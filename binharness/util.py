@@ -3,7 +3,10 @@ from __future__ import annotations
 
 import shlex
 from pathlib import Path
-from typing import Sequence
+from typing import TYPE_CHECKING, Generator, Sequence
+
+if TYPE_CHECKING:
+    from binharness.process import IO
 
 
 def normalize_args(*args: Path | str | Sequence[Path | str]) -> Sequence[str]:
@@ -24,3 +27,19 @@ def normalize_args(*args: Path | str | Sequence[Path | str]) -> Sequence[str]:
 def join_normalized_args(args: Sequence[str]) -> str:
     """Convert a list of normalized arguments to a string."""
     return " ".join(shlex.quote(arg) for arg in args)
+
+
+def read_lines(file: IO[bytes]) -> Generator[bytes, None, None]:
+    """Read lines from a file."""
+    buffer = b""
+    while True:
+        chunk = file.read(4096)
+        if not chunk:
+            if buffer:
+                yield buffer
+            break
+
+        buffer += chunk
+        while b"\n" in buffer:
+            line, buffer = buffer.split(b"\n", 1)
+            yield line + b"\n"
