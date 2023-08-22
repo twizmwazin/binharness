@@ -3,7 +3,7 @@ from __future__ import annotations
 import pathlib
 import tempfile
 
-from binharness.inject import BusyboxInjection
+from binharness.busybox import BusyboxInjection
 from binharness.localenvironment import LocalEnvironment
 
 
