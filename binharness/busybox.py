@@ -1,6 +1,7 @@
 """binharness.busybox - A busybox injection."""
 from __future__ import annotations
 
+from os import environ
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -26,7 +27,18 @@ class BusyboxInjection(ExecutableInjection):
     def install(self: BusyboxInjection, environment: Environment) -> None:
         """Install the injection into an environment."""
         self.env_path = environment.get_tempdir()
-        super().install(environment)
+        try:
+            super().install(environment)
+        except OSError as ex:
+            # Ignore "Text file busy" errors in CI. This is likely due to
+            # multiple tests running in parallel and trying to install the
+            # busybox injection at the same time.
+            if "PYTEST_CURRENT_TEST" in environ and (
+                "[Errno 26] Text file busy" in str(ex) or "Failure4" in str(ex)
+            ):
+                self._environment = environment
+            else:
+                raise
         environment.busybox_injection = self
 
     def mktemp(
