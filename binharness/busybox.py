@@ -34,7 +34,7 @@ class BusyboxInjection(ExecutableInjection):
             # multiple tests running in parallel and trying to install the
             # busybox injection at the same time.
             if "PYTEST_CURRENT_TEST" in environ and (
-                "[Errno 26] Text file busy" in str(ex) or "Failure4" in str(ex)
+                "[Errno 26] Text file busy" in str(ex) or "Failure" in str(ex)
             ):
                 self._environment = environment
             else:
