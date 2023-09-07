@@ -4,8 +4,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
+from binharness.busybox import BusyboxInjection
 from binharness.inject import (
-    BusyboxInjection,
     Injection,
     InjectionNotInstalledError,
 )

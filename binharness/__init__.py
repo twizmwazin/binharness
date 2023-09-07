@@ -3,6 +3,7 @@ from __future__ import annotations
 
 __version__ = "0.1.0dev0"
 
+from binharness.busybox import BusyboxInjection
 from binharness.environment import Environment
 from binharness.executor import (
     BusyboxShellExecutor,
@@ -13,7 +14,6 @@ from binharness.executor import (
     NullExecutor,
 )
 from binharness.inject import (
-    BusyboxInjection,
     ExecutableInjection,
     Injection,
     InjectionAlreadyInstalledError,

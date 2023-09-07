@@ -5,7 +5,6 @@ from pathlib import Path
 import pytest
 
 from binharness.inject import (
-    BusyboxInjection,
     ExecutableInjection,
     Injection,
     InjectionAlreadyInstalledError,
@@ -54,29 +53,3 @@ def test_executable_injection_no_install() -> None:
     true_injection = ExecutableInjection(Path("true"), Path("/bin/true"))
     with pytest.raises(InjectionNotInstalledError):
         true_injection.run()
-
-
-def test_busybox_injection() -> None:
-    env = LocalEnvironment()
-    busybox_injection = BusyboxInjection()
-    busybox_injection.install(env)
-    assert busybox_injection.run("true").wait() == 0
-    assert busybox_injection.run("false").wait() == 1
-
-    proc = busybox_injection.run(
-        "head",
-        "-n",
-        "1",
-    )
-    assert proc.stdin is not None
-    stdout, _ = proc.communicate(b"one\ntwo\n")
-    assert proc.returncode == 0
-    assert stdout == b"one\n"
-
-
-def test_busbox_injection_mktemp() -> None:
-    env = LocalEnvironment()
-    busybox_injection = BusyboxInjection()
-    busybox_injection.install(env)
-    assert busybox_injection.mktemp().is_file()
-    assert busybox_injection.mktemp(directory=True).is_dir()
