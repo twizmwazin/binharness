@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 
+from binharness.common.busybox import BusyboxShellExecutor
 from binharness.environment.localenvironment import LocalEnvironment
 from binharness.types.executor import (
-    BusyboxShellExecutor,
     ExecutorEnvironmentMismatchError,
 )
 from binharness.types.injection import InjectionNotInstalledError
