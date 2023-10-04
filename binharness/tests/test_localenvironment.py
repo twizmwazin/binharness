@@ -3,8 +3,8 @@ from __future__ import annotations
 import pathlib
 import tempfile
 
-from binharness.busybox import BusyboxInjection
-from binharness.localenvironment import LocalEnvironment
+from binharness.common.busybox import BusyboxInjection
+from binharness.environment.localenvironment import LocalEnvironment
 
 
 def test_run_command() -> None:

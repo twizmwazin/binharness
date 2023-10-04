@@ -1,15 +1,15 @@
-"""binharness.busybox - A busybox injection."""
+"""binharness.common.busybox - A busybox injection."""
 from __future__ import annotations
 
 from os import environ
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from binharness.inject import ExecutableInjection
+from binharness.types.injection import ExecutableInjection
 
 if TYPE_CHECKING:
-    from binharness.environment import Environment
-    from binharness.process import Process
+    from binharness.types.environment import Environment
+    from binharness.types.process import Process
 
 
 class BusyboxInjection(ExecutableInjection):

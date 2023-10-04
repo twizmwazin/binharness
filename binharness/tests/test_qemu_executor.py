@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from binharness import LocalEnvironment, Target
-from binharness.qemu import QemuExecutor
+from binharness.common.qemu import QemuExecutor
 
 
 def test_run_true() -> None:

@@ -3,8 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 
 from binharness import LocalEnvironment
-from binharness.executor import BusyboxShellExecutor, NullExecutor
-from binharness.target import Target
+from binharness.types.executor import BusyboxShellExecutor, NullExecutor
+from binharness.types.target import Target
 
 
 def test_run_target() -> None:

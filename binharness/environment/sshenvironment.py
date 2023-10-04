@@ -1,16 +1,19 @@
-"""binharness.sshenvironment: SSHEnvironment."""
+"""binharness.environment.sshenvironment: SSHEnvironment."""
 from __future__ import annotations
 
 import shlex
 import stat
 from pathlib import Path
-from typing import Any, Sequence
+from typing import TYPE_CHECKING, Any, Sequence
 
 import paramiko
 
-from binharness.environment import Environment
-from binharness.process import IO, Process
+from binharness.types.environment import Environment
+from binharness.types.process import Process
 from binharness.util import join_normalized_args, normalize_args
+
+if TYPE_CHECKING:
+    from binharness.types.io import IO
 
 
 class SSHEnvironmentError(Exception):

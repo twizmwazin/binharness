@@ -7,10 +7,10 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from binharness.target import Target
+from binharness.types.target import Target
 
 if TYPE_CHECKING:
-    from binharness.environment import Environment
+    from binharness.types.environment import Environment
 
 
 class TargetImportError(Exception):

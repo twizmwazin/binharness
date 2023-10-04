@@ -3,9 +3,11 @@ from __future__ import annotations
 
 __version__ = "0.1.0dev0"
 
-from binharness.busybox import BusyboxInjection
-from binharness.environment import Environment
-from binharness.executor import (
+from binharness.common.busybox import BusyboxInjection
+from binharness.environment.localenvironment import LocalEnvironment
+from binharness.serialize import TargetImportError, export_target, import_target
+from binharness.types.environment import Environment
+from binharness.types.executor import (
     BusyboxShellExecutor,
     Executor,
     ExecutorEnvironmentMismatchError,
@@ -13,17 +15,15 @@ from binharness.executor import (
     InjectableExecutor,
     NullExecutor,
 )
-from binharness.inject import (
+from binharness.types.injection import (
     ExecutableInjection,
     Injection,
     InjectionAlreadyInstalledError,
     InjectionError,
     InjectionNotInstalledError,
 )
-from binharness.localenvironment import LocalEnvironment
-from binharness.process import Process
-from binharness.serialize import TargetImportError, export_target, import_target
-from binharness.target import Target
+from binharness.types.process import Process
+from binharness.types.target import Target
 
 __all__ = [
     "BusyboxInjection",

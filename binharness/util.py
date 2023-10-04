@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Generator, Sequence
 
 if TYPE_CHECKING:
-    from binharness.process import IO
+    from binharness.types.io import IO
 
 
 def normalize_args(*args: Path | str | Sequence[Path | str]) -> Sequence[str]:
