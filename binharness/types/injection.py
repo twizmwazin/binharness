@@ -1,9 +1,9 @@
-"""binharness.inject - Inject files into an environment."""
+"""binharness.types.inject - Inject files into an environment."""
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from binharness.environment import BusyboxInjectionNotInstalledError
+from binharness.types.environment import BusyboxInjectionNotInstalledError
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -50,7 +50,7 @@ class Injection:
             try:
                 bb_injection = environment.busybox_injection
             except BusyboxInjectionNotInstalledError:
-                from binharness.busybox import BusyboxInjection
+                from binharness.common.busybox import BusyboxInjection
 
                 bb_injection = BusyboxInjection()
                 bb_injection.install(environment)

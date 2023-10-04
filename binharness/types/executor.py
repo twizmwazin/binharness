@@ -1,11 +1,10 @@
-"""binharness.executor - A way to run a target in an environment."""
+"""binharness.types.executor - A way to run a target in an environment."""
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
-from binharness.busybox import BusyboxInjection
-from binharness.inject import (
+from binharness.types.injection import (
     Injection,
     InjectionNotInstalledError,
 )
@@ -56,17 +55,5 @@ class NullExecutor(Executor):
         return target.environment.run_command(
             target.main_binary,
             *target.args,
-            env=target.env,
-        )
-
-
-class BusyboxShellExecutor(BusyboxInjection, InjectableExecutor):
-    """BusyboxShellExecutor is a Executor that runs the target in a busybox shell."""
-
-    def _run_target(self: BusyboxShellExecutor, target: Target) -> Process:
-        return self.run(
-            "sh",
-            "-c",
-            f"{target.main_binary} {' '.join(target.args)}",
             env=target.env,
         )

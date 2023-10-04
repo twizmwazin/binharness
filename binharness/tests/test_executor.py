@@ -4,13 +4,13 @@ from pathlib import Path
 
 import pytest
 
-from binharness.executor import (
-    BusyboxShellExecutor,
+from binharness.common.busybox import BusyboxShellExecutor
+from binharness.environment.localenvironment import LocalEnvironment
+from binharness.types.executor import (
     ExecutorEnvironmentMismatchError,
 )
-from binharness.inject import InjectionNotInstalledError
-from binharness.localenvironment import LocalEnvironment
-from binharness.target import Target
+from binharness.types.injection import InjectionNotInstalledError
+from binharness.types.target import Target
 
 
 def test_busybox_injection_without_install() -> None:

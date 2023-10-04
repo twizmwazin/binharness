@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, Generator
 import mockssh
 import pytest
 
-from binharness.busybox import BusyboxInjection
-from binharness.sshenvironment import (
+from binharness.common.busybox import BusyboxInjection
+from binharness.environment.sshenvironment import (
     SSHEnvironment,
     SSHInvalidArgumentsError,
     SSHNotConnectedError,

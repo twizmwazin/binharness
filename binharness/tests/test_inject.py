@@ -4,13 +4,13 @@ from pathlib import Path
 
 import pytest
 
-from binharness.inject import (
+from binharness.environment.localenvironment import LocalEnvironment
+from binharness.types.injection import (
     ExecutableInjection,
     Injection,
     InjectionAlreadyInstalledError,
     InjectionNotInstalledError,
 )
-from binharness.localenvironment import LocalEnvironment
 
 
 def test_inject_true() -> None:

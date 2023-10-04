@@ -1,12 +1,12 @@
-"""binharness.qemu - QEMU injection."""
+"""binharness.common.qemu - QEMU injection."""
 
 from __future__ import annotations
 
 from pathlib import Path
 from typing import TYPE_CHECKING, Generator
 
-from binharness.executor import InjectableExecutor
-from binharness.inject import ExecutableInjection
+from binharness.types.executor import InjectableExecutor
+from binharness.types.injection import ExecutableInjection
 from binharness.util import read_lines
 
 if TYPE_CHECKING:

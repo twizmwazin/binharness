@@ -1,15 +1,18 @@
-"""binharness.localenvironment - A local environment."""
+"""binharness.environment.localenvironment - A local environment."""
 from __future__ import annotations
 
 import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Sequence
+from typing import TYPE_CHECKING, Sequence
 
-from binharness.environment import Environment
-from binharness.process import IO, Process
+from binharness.types.environment import Environment
+from binharness.types.process import Process
 from binharness.util import normalize_args
+
+if TYPE_CHECKING:
+    from binharness.types.io import IO
 
 
 class LocalEnvironment(Environment):

@@ -1,15 +1,16 @@
-"""binharness.busybox - A busybox injection."""
+"""binharness.common.busybox - A busybox injection."""
 from __future__ import annotations
 
 from os import environ
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from binharness.inject import ExecutableInjection
+from binharness.types import InjectableExecutor, Target
+from binharness.types.injection import ExecutableInjection
 
 if TYPE_CHECKING:
-    from binharness.environment import Environment
-    from binharness.process import Process
+    from binharness.types.environment import Environment
+    from binharness.types.process import Process
 
 
 class BusyboxInjection(ExecutableInjection):
@@ -69,3 +70,15 @@ class BusyboxInjection(ExecutableInjection):
         if listen:
             return self.run("nc", "-lp", str(port))
         return self.run("nc", host, str(port))
+
+
+class BusyboxShellExecutor(BusyboxInjection, InjectableExecutor):
+    """BusyboxShellExecutor is a Executor that runs the target in a busybox shell."""
+
+    def _run_target(self: BusyboxShellExecutor, target: Target) -> Process:
+        return self.run(
+            "sh",
+            "-c",
+            f"{target.main_binary} {' '.join(target.args)}",
+            env=target.env,
+        )
