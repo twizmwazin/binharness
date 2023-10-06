@@ -22,7 +22,7 @@ class ExecutorEnvironmentMismatchError(ExecutorError):
 
 
 class Executor(ABC):
-    """A Executor is a way to run a target in an environment."""
+    """An Executor is a way to run a target in an environment."""
 
     @abstractmethod
     def run_target(self: Executor, target: Target) -> Process:
@@ -31,7 +31,7 @@ class Executor(ABC):
 
 
 class InjectableExecutor(Executor, Injection):
-    """InjectableExecutor is a Executor that must be injected into an environment."""
+    """InjectableExecutor is an Executor that must be injected into an environment."""
 
     @abstractmethod
     def _run_target(self: InjectableExecutor, target: Target) -> Process:
@@ -48,7 +48,7 @@ class InjectableExecutor(Executor, Injection):
 
 
 class NullExecutor(Executor):
-    """NullExecutor is a Executor that just runs the target as a command."""
+    """NullExecutor is an Executor that just runs the target as a command."""
 
     def run_target(self: NullExecutor, target: Target) -> Process:
         """Run a target in an environment without any wrappers."""
