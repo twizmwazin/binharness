@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from binharness.environment.localenvironment import LocalEnvironment
+from binharness.localenvironment import LocalEnvironment
 from binharness.serialize import TargetImportError, export_target, import_target
 from binharness.types.executor import NullExecutor
 from binharness.types.target import Target

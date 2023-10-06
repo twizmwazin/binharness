@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from binharness.environment.localenvironment import LocalEnvironment
+from binharness.localenvironment import LocalEnvironment
 from binharness.types.injection import (
     ExecutableInjection,
     Injection,

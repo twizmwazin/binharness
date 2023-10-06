@@ -4,7 +4,7 @@ import pathlib
 import tempfile
 
 from binharness.common.busybox import BusyboxInjection
-from binharness.environment.localenvironment import LocalEnvironment
+from binharness.localenvironment import LocalEnvironment
 
 
 def test_run_command() -> None:
