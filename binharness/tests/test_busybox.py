@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from binharness.common.busybox import BusyboxInjection
-from binharness.environment.localenvironment import LocalEnvironment
+from binharness.localenvironment import LocalEnvironment
 
 
 def test_busybox_injection() -> None:

@@ -1,4 +1,4 @@
-"""binharness.environment.localenvironment - A local environment."""
+"""binharness.localenvironment - A local environment."""
 from __future__ import annotations
 
 import shutil
