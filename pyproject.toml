@@ -19,13 +19,11 @@ dynamic = ["version"]
 dev = [
     "black>=23.3.0",
     "coverage[toml]>=7.2.3",
-    "mock-ssh-server>=0.9.1",
     "mypy>=1.2.0",
     "pre-commit>=3.2.2",
     "pytest>=7.3.1",
     "pytest-cov>=4.0.0",
     "ruff>=0.0.262",
-    "types-paramiko>=3.0.0.7",
 ]
 
 [project.urls]
