@@ -5,7 +5,7 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING, AnyStr, Sequence
 
 from binharness.types.environment import Environment
 from binharness.types.process import Process
@@ -65,6 +65,10 @@ class LocalEnvironment(Environment):
     def get_tempdir(self: LocalEnvironment) -> Path:
         """Get a Path for a temporary directory."""
         return Path(tempfile.gettempdir())
+
+    def open_file(self: Environment, path: Path, mode: str) -> IO[AnyStr]:
+        """Open a file in the environment. Follows the same semantics as `open`."""
+        return Path.open(path, mode)
 
 
 class LocalProcess(Process):
