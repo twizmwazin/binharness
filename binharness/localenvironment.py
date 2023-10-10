@@ -70,7 +70,7 @@ class LocalEnvironment(Environment):
 class LocalProcess(Process):
     """A process running in a local environment."""
 
-    popen: subprocess.Popen
+    popen: subprocess.Popen[bytes]
 
     def __init__(
         self: LocalProcess,
@@ -88,6 +88,7 @@ class LocalProcess(Process):
             stderr=subprocess.PIPE,
             env=env,
             cwd=cwd,
+            universal_newlines=False,
         )
 
     @property
