@@ -2,12 +2,12 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING, AnyStr, Sequence
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from binharness import BusyboxInjection, Process
+    from binharness import IO, BusyboxInjection, Process
 
 
 class BusyboxInjectionNotInstalledError(Exception):
@@ -85,4 +85,9 @@ class Environment(ABC):
     @abstractmethod
     def get_tempdir(self: Environment) -> Path:
         """Get a Path for a temporary directory."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def open_file(self: Environment, path: Path, mode: str) -> IO[AnyStr]:
+        """Open a file in the environment. Follows the same semantics as `open`."""
         raise NotImplementedError
