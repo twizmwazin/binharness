@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from binharness.util import generate_random_suffix
+
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -46,10 +48,12 @@ class Injection:
             raise InjectionAlreadyInstalledError
         if self.env_path is None:
             self.env_path = environment.get_tempdir() / (
-                self.__class__.__name__ + ".bh-inj"
+                f"{self.host_path.name}-{generate_random_suffix()}.bh-inj"
             )
 
-        environment.inject_files([(self.host_path, self.env_path)])
+        environment.inject_files(
+            [(self.host_path, self.env_path / self.host_path.name)]
+        )
         self._environment = environment
 
     def is_installed(self: Injection) -> bool:
