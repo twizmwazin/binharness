@@ -5,9 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Generator, cast
 
-from binharness import IO
 from binharness.types.executor import InjectableExecutor
 from binharness.types.injection import ExecutableInjection
+from binharness.types.io import IO
 from binharness.util import generate_random_suffix, read_lines
 
 if TYPE_CHECKING:
