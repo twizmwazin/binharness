@@ -7,11 +7,7 @@ from typing import TYPE_CHECKING, AnyStr, Sequence
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from binharness import IO, BusyboxInjection, Process
-
-
-class BusyboxInjectionNotInstalledError(Exception):
-    """BusyBox is not installed in the environment."""
+    from binharness import IO, Process
 
 
 class Environment(ABC):
@@ -21,27 +17,6 @@ class Environment(ABC):
     Environment provides low level APIs for file injection and retrieval, as
     well as running commands.
     """
-
-    _busybox_injection: BusyboxInjection | None
-
-    def __init__(self: Environment) -> None:
-        """Create an Environment."""
-        self._busybox_injection = None
-
-    @property
-    def busybox_injection(self: Environment) -> BusyboxInjection:
-        """Return the BusyboxInjection for the environment."""
-        if self._busybox_injection is None:
-            raise BusyboxInjectionNotInstalledError
-        return self._busybox_injection
-
-    @busybox_injection.setter
-    def busybox_injection(
-        self: Environment,
-        busybox_injection: BusyboxInjection,
-    ) -> None:
-        """Set the BusyboxInjection for the environment."""
-        self._busybox_injection = busybox_injection
 
     @abstractmethod
     def run_command(

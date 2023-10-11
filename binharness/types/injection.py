@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from binharness.types.environment import BusyboxInjectionNotInstalledError
+from binharness.util import generate_random_suffix
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -47,16 +47,13 @@ class Injection:
         if self._environment is not None:
             raise InjectionAlreadyInstalledError
         if self.env_path is None:
-            try:
-                bb_injection = environment.busybox_injection
-            except BusyboxInjectionNotInstalledError:
-                from binharness.common.busybox import BusyboxInjection
+            self.env_path = environment.get_tempdir() / (
+                f"{self.host_path.name}-{generate_random_suffix()}.bh-inj"
+            )
 
-                bb_injection = BusyboxInjection()
-                bb_injection.install(environment)
-            self.env_path = bb_injection.mktemp(directory=True)
-
-        environment.inject_files([(self.host_path, self.env_path)])
+        environment.inject_files(
+            [(self.host_path, self.env_path / self.host_path.name)]
+        )
         self._environment = environment
 
     def is_installed(self: Injection) -> bool:

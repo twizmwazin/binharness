@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Generator, cast
 
 from binharness.types.executor import InjectableExecutor
 from binharness.types.injection import ExecutableInjection
-from binharness.util import read_lines
+from binharness.types.io import IO
+from binharness.util import generate_random_suffix, read_lines
 
 if TYPE_CHECKING:
     from binharness import Process, Target
@@ -35,7 +36,9 @@ class QemuInjection(ExecutableInjection):
         cwd: Path | None = None,
     ) -> tuple[Process, Generator[bytes, None, None]]:
         """Run the injection in the environment and return a log generator."""
-        logfile = self.environment.busybox_injection.mktemp()
+        logfile = (
+            self.environment.get_tempdir() / f"qemu-{generate_random_suffix()}.log"
+        )
         proc = self.run(
             "-D",
             str(logfile),
@@ -45,8 +48,8 @@ class QemuInjection(ExecutableInjection):
         )
 
         def log_generator() -> Generator[bytes, None, None]:
-            cat_proc = self.environment.busybox_injection.cat(logfile)
-            yield from read_lines(cat_proc.stdout)
+            file = self.environment.open_file(logfile, "rb")
+            yield from read_lines(cast(IO[bytes], file))
 
             # Cleanup log file
             self.environment.run_command("rm", logfile)

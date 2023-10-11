@@ -1,7 +1,9 @@
 """binharness.util - Utility functions for binharness."""
 from __future__ import annotations
 
+import random
 import shlex
+import string
 from pathlib import Path
 from typing import TYPE_CHECKING, Generator, Sequence
 
@@ -43,3 +45,8 @@ def read_lines(file: IO[bytes]) -> Generator[bytes, None, None]:
         while b"\n" in buffer:
             line, buffer = buffer.split(b"\n", 1)
             yield line + b"\n"
+
+
+def generate_random_suffix(n: int = 6) -> str:
+    """Generate a random suffix."""
+    return "".join(random.choices(string.ascii_letters, k=n))  # noqa: S311
