@@ -40,7 +40,6 @@ class BusyboxInjection(ExecutableInjection):
                 self._environment = environment
             else:
                 raise
-        environment.busybox_injection = self
 
     def mktemp(
         self: BusyboxInjection, directory: bool = False  # noqa: FBT001, FBT002
