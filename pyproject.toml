@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=67", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
 
 [project]
 name = "binharness"
@@ -28,11 +28,13 @@ dev = [
 homepage = "https://github.com/twizmwazin/binharness"
 repository = "https://github.com/twizmwazin/binarness.git"
 
-[tool.setuptools.dynamic]
-version = {attr = "binharness.__version__"}
-
-[tool.setuptools.packages.find]
-exclude = ["binharness.tests*"]
+[tool.maturin]
+bindings = "pyo3"
+manifest-path = "crates/bh_agent_client/Cargo.toml"
+python-source = "python"
+python-packages = ["binharness"]
+strip = true
+sdist-generator = "cargo"
 
 [tool.pytest.ini_options]
 addopts = "--tb=native --cov=binharness --cov-report lcov:.lcov --cov-report term-missing"
@@ -62,7 +64,7 @@ ignore-init-module-imports = true
 required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.per-file-ignores]
-"binharness/tests/*" = [
+"python/tests/*" = [
     "D",
     "S101",
 ]

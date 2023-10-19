@@ -5,7 +5,6 @@ import tempfile
 from pathlib import Path
 
 import pytest
-
 from binharness.localenvironment import LocalEnvironment
 from binharness.serialize import TargetImportError, export_target, import_target
 from binharness.types.executor import NullExecutor
