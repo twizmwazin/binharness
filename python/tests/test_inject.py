@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from binharness.localenvironment import LocalEnvironment
 from binharness.types.injection import (
     ExecutableInjection,

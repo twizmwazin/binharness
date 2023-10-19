@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from binharness.common.busybox import BusyboxShellExecutor
 from binharness.localenvironment import LocalEnvironment
 from binharness.types.executor import (
