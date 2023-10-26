@@ -25,6 +25,8 @@ fn parse_args() -> Result<(IpAddr, u16)> {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    env_logger::init();
+
     let server_addr = parse_args().or_else(|e| -> Result<(IpAddr, u16)> {
         eprintln!("{}", e);
         std::process::exit(1);

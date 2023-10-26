@@ -55,10 +55,15 @@ ignore = [
     "COM",
     "D203",
     "D213",
+    "FBT003",
+    "FIX",
     "S108",
     "S603",
+    "TD002",
+    "TD003",
 ]
 ignore-init-module-imports = true
+line-length = 88
 
 [tool.ruff.isort]
 required-imports = ["from __future__ import annotations"]
@@ -67,6 +72,11 @@ required-imports = ["from __future__ import annotations"]
 "python/tests/*" = [
     "D",
     "S101",
+]
+"**/*.pyi" = [
+    "ANN101",
+    "FBT",
+    "PLR0913",
 ]
 
 [tool.mypy]
