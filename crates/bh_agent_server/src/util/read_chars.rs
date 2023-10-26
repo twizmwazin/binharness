@@ -2,17 +2,26 @@ use std::fs::File;
 use std::io::Read;
 
 use anyhow::Result;
+use log::trace;
 
 use bh_agent_common::FileOpenType;
 
-pub fn read_generic(mut file: &File, n: u32, file_type: FileOpenType) -> Result<Vec<u8>> {
-    match file_type {
-        FileOpenType::Binary => {
-            let mut buffer = vec![0u8; n as usize];
-            file.read(&mut buffer)?;
-            Ok(buffer)
+pub fn read_generic(mut file: &File, n: Option<u32>, file_type: FileOpenType) -> Result<Vec<u8>> {
+    trace!("Entering read_generic");
+    if let Some(num_bytes) = n {
+        match file_type {
+            FileOpenType::Binary => {
+                let mut buffer = vec![0u8; num_bytes as usize];
+                file.read(&mut buffer)?;
+                Ok(buffer)
+            }
+            FileOpenType::Text => Ok(read_chars(&mut file, num_bytes as usize)?),
         }
-        FileOpenType::Text => Ok(read_chars(&mut file, n as usize)?),
+    } else {
+        // if n is None, we just read the whole file, text parsing happens on the client
+        let mut buffer = Vec::new();
+        file.read_to_end(&mut buffer)?;
+        Ok(buffer)
     }
 }
 

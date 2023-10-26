@@ -177,7 +177,7 @@ impl BhAgentClient {
         )
     }
 
-    fn file_read(&self, env_id: EnvironmentId, fd: FileId, num_bytes: u32) -> PyResult<Vec<u8>> {
+    fn file_read(&self, env_id: EnvironmentId, fd: FileId, num_bytes: Option<u32>) -> PyResult<Vec<u8>> {
         run_in_runtime(
             self,
             self.client

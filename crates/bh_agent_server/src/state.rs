@@ -1,8 +1,10 @@
+use bimap::BiMap;
 use std::collections::HashMap;
 use std::ffi::OsStr;
+use std::fmt::Display;
 use std::fs::{File, OpenOptions};
 use std::sync::{Arc, RwLock};
-use futures_util::TryFutureExt;
+use log::{debug, trace};
 
 use subprocess::{Popen, PopenConfig};
 
@@ -20,9 +22,9 @@ pub struct BhAgentState {
     file_modes: RwLock<HashMap<FileId, FileOpenMode>>,
     file_types: RwLock<HashMap<FileId, FileOpenType>>,
     processes: RwLock<HashMap<ProcessId, Arc<RwLock<Popen>>>>,
-    proc_stdin_ids: RwLock<HashMap<FileId, ProcessId>>,
-    proc_stdout_ids: RwLock<HashMap<FileId, ProcessId>>,
-    proc_stderr_ids: RwLock<HashMap<FileId, ProcessId>>,
+    proc_stdin_ids: RwLock<BiMap<ProcessId, FileId>>,
+    proc_stdout_ids: RwLock<BiMap<ProcessId, FileId>>,
+    proc_stderr_ids: RwLock<BiMap<ProcessId, FileId>>,
 
     next_file_id: RwLock<FileId>,
     next_process_id: RwLock<ProcessId>,
@@ -35,9 +37,9 @@ impl BhAgentState {
             file_modes: RwLock::new(HashMap::new()),
             file_types: RwLock::new(HashMap::new()),
             processes: RwLock::new(HashMap::new()),
-            proc_stdin_ids: RwLock::new(HashMap::new()),
-            proc_stdout_ids: RwLock::new(HashMap::new()),
-            proc_stderr_ids: RwLock::new(HashMap::new()),
+            proc_stdin_ids: RwLock::new(BiMap::new()),
+            proc_stdout_ids: RwLock::new(BiMap::new()),
+            proc_stderr_ids: RwLock::new(BiMap::new()),
 
             next_file_id: RwLock::new(0),
             next_process_id: RwLock::new(0),
@@ -63,6 +65,7 @@ impl BhAgentState {
         fd: &FileId,
         modes: &Vec<FileOpenMode>,
     ) -> Result<bool, AgentError> {
+        trace!("Checking file {} for modes {:?}", fd, modes);
         Ok(modes.contains(
             self.file_modes
                 .read()?
@@ -72,6 +75,7 @@ impl BhAgentState {
     }
 
     pub fn file_type(&self, fd: &FileId) -> Result<FileOpenType, AgentError> {
+        trace!("Getting file type for {}", fd);
         Ok(self
             .file_types
             .read()?
@@ -154,16 +158,31 @@ impl BhAgentState {
 
         // Stick the process channels into the file map
         if proc.stdin.is_some() {
+            trace!("Saving stdin for process {}", proc_id);
             let file_id = self.take_file_id()?;
-            self.proc_stdin_ids.write()?.insert(file_id, proc_id);
+            self.proc_stdin_ids.write()?.insert(proc_id, file_id);
+            self.file_modes.write()?.insert(file_id, FileOpenMode::Write);
+            self.file_types.write()?.insert(file_id, FileOpenType::Binary);
+        } else {
+            trace!("Process {} has no stdin", proc_id);
         }
         if proc.stdout.is_some() {
+            trace!("Saving stdout for process {}", proc_id);
             let file_id = self.take_file_id()?;
-            self.proc_stdout_ids.write()?.insert(file_id, proc_id);
+            self.proc_stdout_ids.write()?.insert(proc_id, file_id);
+            self.file_modes.write()?.insert(file_id, FileOpenMode::Read);
+            self.file_types.write()?.insert(file_id, FileOpenType::Binary);
+        } else {
+            trace!("Process {} has no stdout", proc_id);
         }
         if proc.stderr.is_some() {
+            trace!("Saving stderr for process {}", proc_id);
             let file_id = self.take_file_id()?;
-            self.proc_stdout_ids.write()?.insert(file_id, proc_id);
+            self.proc_stdout_ids.write()?.insert(proc_id, file_id);
+            self.file_modes.write()?.insert(file_id, FileOpenMode::Read);
+            self.file_types.write()?.insert(file_id, FileOpenType::Binary);
+        } else {
+            trace!("Process {} has no stderr", proc_id);
         }
 
         // Move the proc to the process map
@@ -179,18 +198,30 @@ impl BhAgentState {
         proc_id: &ProcessId,
         channel: ProcessChannel,
     ) -> Result<FileId, AgentError> {
-        match channel {
+        let channel_ids = match channel {
             ProcessChannel::Stdin => &self.proc_stdin_ids,
             ProcessChannel::Stdout => &self.proc_stdout_ids,
             ProcessChannel::Stderr => &self.proc_stderr_ids,
-        }
+        };
+
+        channel_ids
         .read()?
-        .get(&proc_id)
+        .get_by_left(&proc_id)
         .map(|i| i.clone())
-        .ok_or(InvalidProcessId)
+        .ok_or((|| {
+            debug!("Failed to get process channel");
+            debug!("Process ID: {}", proc_id);
+            debug!("Channel: {:?}", channel);
+            let proc_is_valid = self.processes.read().unwrap().contains_key(&proc_id);
+            debug!("Process is valid: {}", proc_is_valid);
+            debug!("Process with valid channels: {:?}", channel_ids.read().unwrap().left_values());
+
+            InvalidProcessId
+        })())
     }
 
     pub fn close_file(&self, fd: &FileId) -> Result<(), AgentError> {
+        trace!("Closing file {}", fd);
         Ok(drop(
             self.files
                 .write()?
@@ -208,29 +239,39 @@ impl BhAgentState {
         fd: &FileId,
         op: impl Fn(&mut File) -> R,
     ) -> Result<R, AgentError> {
+        trace!("Doing mut operation on file {}", fd);
+
         // Get file logic
         if let Some(file_lock) = self.files.read()?.get(fd) {
             return Ok(op(&mut *file_lock.write()?));
+        } else {
+            trace!("File id map: {:?}", self.files.read()?);
         }
 
         // If these unwraps fail, the state is bad
-        if let Some(pid) = self.proc_stdin_ids.read()?.get(&fd) {
+        if let Some(pid) = self.proc_stdin_ids.read()?.get_by_right(&fd) {
             let procs_binding = self.processes.read()?;
             let mut proc_binding = procs_binding.get(pid).unwrap().write()?;
             let file = proc_binding.stdin.as_mut().unwrap();
             return Ok(op(file));
+        } else {
+            trace!("Process stdin id map: {:?}", self.proc_stdin_ids.read()?);
         }
-        if let Some(pid) = self.proc_stdout_ids.read()?.get(&fd) {
+        if let Some(pid) = self.proc_stdout_ids.read()?.get_by_right(&fd) {
             let procs_binding = self.processes.read()?;
             let mut proc_binding = procs_binding.get(pid).unwrap().write()?;
             let file = proc_binding.stdout.as_mut().unwrap();
             return Ok(op(file));
+        } else {
+            trace!("Process stdout id map: {:?}", self.proc_stdout_ids.read()?);
         }
-        if let Some(pid) = self.proc_stderr_ids.read()?.get(&fd) {
+        if let Some(pid) = self.proc_stderr_ids.read()?.get_by_right(&fd) {
             let procs_binding = self.processes.read()?;
             let mut proc_binding = procs_binding.get(pid).unwrap().write()?;
             let file = proc_binding.stderr.as_mut().unwrap();
             return Ok(op(file));
+        } else {
+            trace!("Process stderr id map: {:?}", self.proc_stderr_ids.read()?);
         }
 
         Err(InvalidFileDescriptor)

@@ -132,7 +132,7 @@ impl BhAgentService for BhAgentServer {
         _: Context,
         env_id: EnvironmentId,
         fd: FileId,
-        num_bytes: u32,
+        num_bytes: Option<u32>,
     ) -> Self::FileReadFut {
         check_env_id!(env_id);
 

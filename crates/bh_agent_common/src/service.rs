@@ -45,7 +45,7 @@ pub trait BhAgentService {
     async fn file_read(
         env_id: EnvironmentId,
         fd: FileId,
-        num_bytes: u32,
+        num_bytes: Option<u32>,
     ) -> Result<Vec<u8>, AgentError>;
 
     async fn file_read_lines(
