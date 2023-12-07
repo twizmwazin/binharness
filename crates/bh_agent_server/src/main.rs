@@ -1,7 +1,6 @@
 use std::net::IpAddr;
-use std::str::FromStr;
 
-use anyhow::Result;
+use clap::Parser;
 use futures::{future, prelude::*};
 use tarpc::{
     server::{self, Channel},
@@ -11,28 +10,20 @@ use tarpc::{
 use bh_agent_common::BhAgentService;
 use bh_agent_server::BhAgentServer;
 
-fn parse_args() -> Result<(IpAddr, u16)> {
-    let args: Vec<String> = std::env::args().collect();
-    if args.len() != 3 {
-        return Err(anyhow::anyhow!("Usage: {} <ip_addr> <port>", args[0]));
-    }
-
-    let ip_addr = IpAddr::from_str(&args[1])?;
-    let port = args[2].parse::<u16>()?;
-
-    Ok((ip_addr, port))
+#[derive(Parser)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    address: IpAddr,
+    port: u16,
 }
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     env_logger::init();
 
-    let server_addr = parse_args().or_else(|e| -> Result<(IpAddr, u16)> {
-        eprintln!("{}", e);
-        std::process::exit(1);
-    })?;
+    let args = Args::parse();
 
-    let mut listener = tarpc::serde_transport::tcp::listen(&server_addr, Json::default).await?;
+    let mut listener = tarpc::serde_transport::tcp::listen(&(args.address, args.port), Json::default).await?;
     listener.config_mut().max_frame_length(usize::MAX);
     listener
         // Ignore accept errors.
