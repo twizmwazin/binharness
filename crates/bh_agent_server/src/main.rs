@@ -18,6 +18,7 @@ struct Args {
     address: IpAddr,
     /// The port to listen on
     port: u16,
+    #[cfg(not(target_os = "windows"))]
     #[arg(short, long, default_value = "false", help = "Daemonize the process")]
     daemonize: bool,
 }
@@ -39,6 +40,7 @@ fn main() -> anyhow::Result<()> {
     listener.config_mut().max_frame_length(usize::MAX);
 
     // Daemonize
+    #[cfg(not(target_os = "windows"))]
     if args.daemonize {
         daemonize::Daemonize::new()
             .pid_file("/tmp/bh_agent_server.pid")
