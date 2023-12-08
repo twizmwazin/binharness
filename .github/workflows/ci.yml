@@ -1,8 +1,58 @@
 name: CI
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  build:
+  build_server:
+    name: Build server
+    runs-on: ubuntu-22.04
+    strategy:
+        fail-fast: false
+        matrix:
+          targets:
+            # Developer/GNU targets
+            - aarch64-unknown-linux-gnu
+            - x86_64-unknown-linux-gnu
+
+            # Musl targets
+            - aarch64-unknown-linux-musl
+            - armv7-unknown-linux-musleabi
+            - i686-unknown-linux-musl
+            - mips-unknown-linux-musl
+            - x86_64-unknown-linux-musl
+
+            # Windows targets
+            - i686-pc-windows-gnu
+            - x86_64-pc-windows-gnu
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cd crates/bh_agent_server && cross build --target ${{ matrix.targets }}
+
+  build_server_macos:
+    name: Build server (macOS)
+    runs-on: macos-12
+    strategy:
+        fail-fast: false
+        matrix:
+          targets:
+            - aarch64-apple-darwin
+            - x86_64-apple-darwin
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install target
+        run: rustup target add ${{ matrix.targets }}
+      - name: Build
+        run: cd crates/bh_agent_server && cargo build --target ${{ matrix.targets }}
+
+  test_python:
     runs-on: ubuntu-22.04
     strategy:
         matrix:
