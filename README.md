@@ -93,7 +93,7 @@ binharness/
   is not desgined for this use case and requires other tools to make effective
   use of it. Binharness looks to leverage docker and its ecosystem to take
   advatage of its strengths like image management and runtime isolation.
-- [SSHs](https://en.wikipedia.org/wiki/Secure_Shell) SSH is the primary protocol
+- [SSH](https://en.wikipedia.org/wiki/Secure_Shell) SSH is the primary protocol
   for remote access and management of machines. Binharness uses SSH as one of
   the primary ways to bootrap remote environments. In a previous version,
   Binharness used SSH as the primary way to communicate with remote environments
