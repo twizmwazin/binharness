@@ -25,7 +25,7 @@ repos:
   - id: rst-inline-touching-normal
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.7.1
+  rev: v1.8.0
   hooks:
   - id: mypy
     args: [--strict]
@@ -36,7 +36,7 @@ repos:
   - id: validate-pyproject
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.1.8
+  rev: v0.1.9
   hooks:
   - id: ruff
     args: [--fix, --exit-non-zero-on-fix]
@@ -47,6 +47,6 @@ repos:
   - id: asort
 
 - repo: https://github.com/psf/black
-  rev: 23.12.0
+  rev: 23.12.1
   hooks:
   - id: black
