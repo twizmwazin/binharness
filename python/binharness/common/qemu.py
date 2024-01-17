@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import platform
 from pathlib import Path
 from typing import TYPE_CHECKING, Generator, cast
 
@@ -14,6 +15,11 @@ if TYPE_CHECKING:
     from binharness import Process, Target
 
 
+def _get_qemu_host_arch() -> str:
+    """Get the host architecture."""
+    return platform.machine()  # TODO: Does this work on all platforms?
+
+
 class QemuInjection(ExecutableInjection):
     """A QEMU injection.
 
@@ -22,11 +28,11 @@ class QemuInjection(ExecutableInjection):
 
     arch: str
 
-    def __init__(self: QemuInjection, arch: str) -> None:
+    def __init__(self: QemuInjection, arch: str | None = None) -> None:
         """Create a QemuInjection."""
-        self.arch = arch
+        self.arch = arch if arch is not None else _get_qemu_host_arch()
         super().__init__(
-            Path(f"qemu-{arch}-static"), Path(f"/usr/bin/qemu-{arch}-static")
+            Path(f"qemu-{self.arch}-static"), Path(f"/usr/bin/qemu-{self.arch}-static")
         )
 
     def run_with_log(
