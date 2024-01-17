@@ -21,6 +21,7 @@ dev = [
     "pre-commit>=3.2.2",
     "pytest>=7.3.1",
     "pytest-cov>=4.0.0",
+    "pytest-mypy>=0.10.3",
     "ruff>=0.0.262",
 ]
 
@@ -37,7 +38,7 @@ strip = true
 sdist-generator = "cargo"
 
 [tool.pytest.ini_options]
-addopts = "--tb=native --cov=binharness --cov-report lcov:.lcov --cov-report term-missing"
+addopts = "--tb=native --cov=binharness --cov-report lcov:.lcov --cov-report term-missing --mypy"
 
 [tool.coverage.run]
 branch = true
