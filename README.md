@@ -12,7 +12,7 @@ analyze those targets in.
 - [x] Allow clients to detach from the agent and reconnect later (ie. for
       long-running analyses and road-warrior scenarios)
 - [ ] Automatically bootstrap a remote environment over SSH
-- [ ] Automatically bootstrap a remote environment in Docker
+- [x] Automatically bootstrap a remote environment in Docker
 - [ ] Automatically bootstrap a remote environment in Kubernetes
 
 
