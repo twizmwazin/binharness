@@ -31,7 +31,15 @@ class DockerAgent(AgentConnection):
 
     def __del__(self: DockerAgent) -> None:
         """__del__ is overridden to ensure that the docker client is closed."""
+        if self.container.status == "running":
+            self.container.stop()
+            self.container.remove()
         self._client.close()
+
+    @property
+    def container(self: DockerAgent) -> docker.models.containers.Container:
+        """Return the docker container."""
+        return self._client.containers.get(self._container_id)
 
 
 def _create_in_memory_tarfile(files: dict[str, str]) -> BinaryIO:
@@ -46,10 +54,15 @@ def _create_in_memory_tarfile(files: dict[str, str]) -> BinaryIO:
 
 
 def bootstrap_env_from_image(
-    agent_binary: str, image: str, port: int = 60162
+    agent_binary: str,
+    image: str,
+    port: int = 60162,
+    client: docker.DockerClient | None = None,
 ) -> DockerAgent:
     """Bootstraps an agent running in a docker container."""
-    client = docker.from_env()
+    user_client = client is not None
+    if client is None:
+        client = docker.from_env()
     try:
         # Setup container
         client.images.pull(image)
@@ -67,4 +80,5 @@ def bootstrap_env_from_image(
         # Build agent
         return DockerAgent(container.id, port)
     finally:
-        client.close()
+        if not user_client:
+            client.close()
