@@ -1,15 +1,16 @@
 use bimap::BiMap;
+use log::{debug, trace};
 use std::collections::HashMap;
 use std::ffi::OsStr;
-use std::fmt::Display;
 use std::fs::{File, OpenOptions};
 use std::sync::{Arc, RwLock};
-use log::{debug, trace};
+use std::thread::sleep;
+use std::time::Duration;
 
 use subprocess::{Popen, PopenConfig};
 
 use bh_agent_common::AgentError::{
-    InvalidFileDescriptor, InvalidProcessId, IoError, ProcessStartFailure,
+    InvalidFileDescriptor, InvalidProcessId, IoError, ProcessStartFailure, Unknown
 };
 use bh_agent_common::{
     AgentError, FileId, FileOpenMode, FileOpenType, ProcessChannel, ProcessId, Redirection,
@@ -161,8 +162,12 @@ impl BhAgentState {
             trace!("Saving stdin for process {}", proc_id);
             let file_id = self.take_file_id()?;
             self.proc_stdin_ids.write()?.insert(proc_id, file_id);
-            self.file_modes.write()?.insert(file_id, FileOpenMode::Write);
-            self.file_types.write()?.insert(file_id, FileOpenType::Binary);
+            self.file_modes
+                .write()?
+                .insert(file_id, FileOpenMode::Write);
+            self.file_types
+                .write()?
+                .insert(file_id, FileOpenType::Binary);
         } else {
             trace!("Process {} has no stdin", proc_id);
         }
@@ -171,7 +176,9 @@ impl BhAgentState {
             let file_id = self.take_file_id()?;
             self.proc_stdout_ids.write()?.insert(proc_id, file_id);
             self.file_modes.write()?.insert(file_id, FileOpenMode::Read);
-            self.file_types.write()?.insert(file_id, FileOpenType::Binary);
+            self.file_types
+                .write()?
+                .insert(file_id, FileOpenType::Binary);
         } else {
             trace!("Process {} has no stdout", proc_id);
         }
@@ -180,7 +187,9 @@ impl BhAgentState {
             let file_id = self.take_file_id()?;
             self.proc_stdout_ids.write()?.insert(proc_id, file_id);
             self.file_modes.write()?.insert(file_id, FileOpenMode::Read);
-            self.file_types.write()?.insert(file_id, FileOpenType::Binary);
+            self.file_types
+                .write()?
+                .insert(file_id, FileOpenType::Binary);
         } else {
             trace!("Process {} has no stderr", proc_id);
         }
@@ -205,19 +214,81 @@ impl BhAgentState {
         };
 
         channel_ids
-        .read()?
-        .get_by_left(&proc_id)
-        .map(|i| i.clone())
-        .ok_or((|| {
-            debug!("Failed to get process channel");
-            debug!("Process ID: {}", proc_id);
-            debug!("Channel: {:?}", channel);
-            let proc_is_valid = self.processes.read().unwrap().contains_key(&proc_id);
-            debug!("Process is valid: {}", proc_is_valid);
-            debug!("Process with valid channels: {:?}", channel_ids.read().unwrap().left_values());
+            .read()?
+            .get_by_left(&proc_id)
+            .map(|i| i.clone())
+            .ok_or((|| {
+                debug!("Failed to get process channel");
+                debug!("Process ID: {}", proc_id);
+                debug!("Channel: {:?}", channel);
+                let proc_is_valid = self.processes.read().unwrap().contains_key(&proc_id);
+                debug!("Process is valid: {}", proc_is_valid);
+                debug!(
+                    "Process with valid channels: {:?}",
+                    channel_ids.read().unwrap().left_values()
+                );
 
-            InvalidProcessId
-        })())
+                InvalidProcessId
+            })())
+    }
+
+    pub fn process_poll(&self, proc_id: &ProcessId) -> Result<Option<u32>, AgentError> {
+        trace!("Polling process {}", proc_id);
+        let proc = self
+            .processes
+            .read()?
+            .get(&proc_id)
+            .ok_or(InvalidProcessId)?
+            .clone();
+        let exit_status = proc.write()?.poll();
+        match exit_status {
+            None => Ok(None),
+            Some(status) => match status {
+                subprocess::ExitStatus::Exited(code) => Ok(Some(code as u32)),
+                subprocess::ExitStatus::Signaled(code) => Ok(Some(code as u32)),
+                subprocess::ExitStatus::Other(code) => Ok(Some(code as u32)),
+                subprocess::ExitStatus::Undetermined => Err(Unknown),
+            },
+        }
+    }
+
+    pub fn process_wait(&self, proc_id: &ProcessId, timeout: Option<u32>) -> Result<bool, AgentError> {
+        trace!("Waiting for process {}", proc_id);
+        // This is implemented as a busy loop to avoid holding the write lock
+        // for too long. Open to suggestions on how to improve this.
+        let mut elapsed = Duration::from_millis(0);
+        loop {
+            match self.process_poll(proc_id)? {
+                None => (),
+                Some(_) => return Ok(false),
+            }
+            elapsed += Duration::from_millis(100);
+            if elapsed < Duration::from_millis(timeout.unwrap_or(u32::MAX) as u64) {
+                sleep(Duration::from_millis(100));
+            } else {
+                return Ok(true);
+            }
+        }
+    }
+
+    pub fn process_exit_code(&self, proc_id: &ProcessId) -> Result<Option<u32>, AgentError> {
+        trace!("Getting exit code for process {}", proc_id);
+        let proc = self
+            .processes
+            .read()?
+            .get(&proc_id)
+            .ok_or(InvalidProcessId)?
+            .clone();
+        let exit_status = proc.read()?.exit_status();
+        match exit_status {
+            None => Ok(None),
+            Some(status) => match status {
+                subprocess::ExitStatus::Exited(code) => Ok(Some(code)),
+                subprocess::ExitStatus::Signaled(code) => Ok(Some(code as u32)),
+                subprocess::ExitStatus::Other(code) => Ok(Some(code as u32)),
+                subprocess::ExitStatus::Undetermined => Err(Unknown),
+            },
+        }
     }
 
     pub fn close_file(&self, fd: &FileId) -> Result<(), AgentError> {

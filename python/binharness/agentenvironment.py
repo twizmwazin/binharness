@@ -45,8 +45,10 @@ class AgentIO(IO[bytes]):
 
     def read(self: AgentIO, n: int = -1) -> bytes:
         """Read n bytes from the file."""
-        return self._client.file_read(
-            self._environment_id, self._fd, None if n == -1 else n
+        return bytes(
+            self._client.file_read(
+                self._environment_id, self._fd, None if n == -1 else n
+            )
         )
 
     def readable(self: AgentIO) -> bool:
@@ -133,18 +135,15 @@ class AgentProcess(Process):
     @property
     def returncode(self: AgentProcess) -> int | None:
         """Get the process' exit code."""
-        # TODO: Need to implement this in the agent protocol
-        return None
+        return self._client.process_returncode(self._env_id, self._pid)
 
     def poll(self: AgentProcess) -> int | None:
         """Return the process' exit code if it has terminated, or None."""
-        # TODO: Need to implement this in the agent protocol
-        return None
+        return self._client.process_poll(self._env_id, self._pid)
 
-    def wait(self: AgentProcess, timeout: float | None = None) -> int:  # noqa: ARG002
+    def wait(self: AgentProcess, timeout: float | None = None) -> int:
         """Wait for the process to terminate and return its exit code."""
-        # TODO: Need to implement this in the agent protocol
-        return 0
+        return self._client.process_wait(self._env_id, self._pid, timeout)
 
 
 class AgentEnvironment(Environment):
@@ -174,7 +173,7 @@ class AgentEnvironment(Environment):
             stdout=True,
             stderr=True,
             executable=str(args[0]),
-            env=env,
+            env=list(env.items()) if env else None,
             cwd=str(cwd) if cwd else None,
             setuid=None,
             setgid=None,
