@@ -3,6 +3,8 @@ from __future__ import annotations
 import pathlib
 import tempfile
 
+import pytest
+
 from binharness.common.busybox import BusyboxInjection
 from binharness.localenvironment import LocalEnvironment
 
@@ -35,6 +37,7 @@ def test_get_tempdir() -> None:
     assert env.get_tempdir() == pathlib.Path(tempfile.gettempdir())
 
 
+@pytest.mark.linux()
 def test_stdout() -> None:
     env = LocalEnvironment()
     busybox = BusyboxInjection()
@@ -43,6 +46,7 @@ def test_stdout() -> None:
     assert proc.stdout.read() == b"hello\n"
 
 
+@pytest.mark.linux()
 def test_stderr() -> None:
     env = LocalEnvironment()
     busybox = BusyboxInjection()
@@ -51,6 +55,7 @@ def test_stderr() -> None:
     assert proc.stderr.read() == b"hello\n"
 
 
+@pytest.mark.linux()
 def test_process_poll() -> None:
     env = LocalEnvironment()
     busybox = BusyboxInjection()
