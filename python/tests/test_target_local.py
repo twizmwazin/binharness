@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from binharness import LocalEnvironment
 from binharness.common.busybox import BusyboxShellExecutor
 from binharness.types.executor import NullExecutor
 from binharness.types.target import Target
 
 
+@pytest.mark.linux()
 def test_run_target() -> None:
     env = LocalEnvironment()
     target = Target(env, Path("true"))
@@ -16,6 +19,7 @@ def test_run_target() -> None:
     assert proc.wait() == 0
 
 
+@pytest.mark.linux()
 def test_run_target_busybox() -> None:
     env = LocalEnvironment()
     target = Target(env, Path("true"))

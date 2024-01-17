@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import pytest
+
 from binharness.common.busybox import BusyboxInjection
 from binharness.localenvironment import LocalEnvironment
 
 
+@pytest.mark.linux()
 def test_busybox_injection() -> None:
     env = LocalEnvironment()
     busybox_injection = BusyboxInjection()
@@ -22,6 +25,7 @@ def test_busybox_injection() -> None:
     assert stdout == b"one\n"
 
 
+@pytest.mark.linux()
 def test_busbox_injection_mktemp() -> None:
     env = LocalEnvironment()
     busybox_injection = BusyboxInjection()
@@ -30,6 +34,7 @@ def test_busbox_injection_mktemp() -> None:
     assert busybox_injection.mktemp(directory=True).is_dir()
 
 
+@pytest.mark.linux()
 def test_nc_interaction() -> None:
     env = LocalEnvironment()
     busybox = BusyboxInjection()

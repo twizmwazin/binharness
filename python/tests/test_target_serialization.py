@@ -5,6 +5,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+
 from binharness.localenvironment import LocalEnvironment
 from binharness.serialize import TargetImportError, export_target, import_target
 from binharness.types.executor import NullExecutor
@@ -13,7 +14,7 @@ from binharness.types.target import Target
 
 def test_local_target_export() -> None:
     env = LocalEnvironment()
-    target = Target(env, Path("/bin/true"))
+    target = Target(env, Path("/usr/bin/true"))
     with tempfile.TemporaryDirectory() as raw_tmpdir:
         tmpdir = Path(raw_tmpdir)
         export_target(target, tmpdir / "test_export.tar.gz")
@@ -21,7 +22,7 @@ def test_local_target_export() -> None:
 
 def test_local_target_import() -> None:
     env = LocalEnvironment()
-    target = Target(env, Path("/bin/true"))
+    target = Target(env, Path("/usr/bin/true"))
     with tempfile.TemporaryDirectory() as raw_tmpdir:
         tmpdir = Path(raw_tmpdir)
         export_target(target, tmpdir / "test_export.tar.gz")
@@ -33,7 +34,7 @@ def test_local_target_import() -> None:
 
 def test_local_target_import_without_metadata() -> None:
     env = LocalEnvironment()
-    target = Target(env, Path("/bin/true"))
+    target = Target(env, Path("/usr/bin/true"))
     with tempfile.TemporaryDirectory() as raw_tmpdir:
         tmpdir = Path(raw_tmpdir)
         export_target(target, tmpdir / "test_export.tar.gz")
@@ -50,7 +51,7 @@ def test_local_target_import_without_metadata() -> None:
 
 def test_local_target_import_invalid_metadata_archive() -> None:
     env = LocalEnvironment()
-    target = Target(env, Path("/bin/true"))
+    target = Target(env, Path("/usr/bin/true"))
     with tempfile.TemporaryDirectory() as raw_tmpdir:
         tmpdir = Path(raw_tmpdir)
         export_target(target, tmpdir / "test_export.tar.gz")
