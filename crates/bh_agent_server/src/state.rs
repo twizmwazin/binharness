@@ -77,8 +77,7 @@ impl BhAgentState {
 
     pub fn file_type(&self, fd: &FileId) -> Result<FileOpenType, AgentError> {
         trace!("Getting file type for {}", fd);
-        self
-            .file_types
+        self.file_types
             .read()?
             .get(fd)
             .ok_or(InvalidFileDescriptor)
@@ -213,23 +212,19 @@ impl BhAgentState {
             ProcessChannel::Stderr => &self.proc_stderr_ids,
         };
 
-        channel_ids
-            .read()?
-            .get_by_left(proc_id)
-            .copied()
-            .ok_or({
-                debug!("Failed to get process channel");
-                debug!("Process ID: {}", proc_id);
-                debug!("Channel: {:?}", channel);
-                let proc_is_valid = self.processes.read().unwrap().contains_key(proc_id);
-                debug!("Process is valid: {}", proc_is_valid);
-                debug!(
-                    "Process with valid channels: {:?}",
-                    channel_ids.read().unwrap().left_values()
-                );
+        channel_ids.read()?.get_by_left(proc_id).copied().ok_or({
+            debug!("Failed to get process channel");
+            debug!("Process ID: {}", proc_id);
+            debug!("Channel: {:?}", channel);
+            let proc_is_valid = self.processes.read().unwrap().contains_key(proc_id);
+            debug!("Process is valid: {}", proc_is_valid);
+            debug!(
+                "Process with valid channels: {:?}",
+                channel_ids.read().unwrap().left_values()
+            );
 
-                InvalidProcessId
-            })
+            InvalidProcessId
+        })
     }
 
     pub fn process_poll(&self, proc_id: &ProcessId) -> Result<Option<u32>, AgentError> {
