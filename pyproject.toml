@@ -40,7 +40,7 @@ strip = true
 sdist-generator = "cargo"
 
 [tool.pytest.ini_options]
-addopts = "--cov=binharness --cov-report lcov:.lcov --cov-report term-missing --mypy"
+addopts = "-ra --cov=binharness --cov-report lcov:.lcov --cov-report term-missing --mypy"
 markers = ["linux", "darwin", "win32", "docker"]
 
 [tool.coverage.run]
