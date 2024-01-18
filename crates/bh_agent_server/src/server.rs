@@ -79,21 +79,37 @@ impl BhAgentService for BhAgentServer {
     }
 
     type ProcessPollFut = Ready<Result<Option<u32>, AgentError>>;
-    fn process_poll(self, _: Context, env_id: EnvironmentId, proc_id: ProcessId) -> Self::ProcessPollFut {
+    fn process_poll(
+        self,
+        _: Context,
+        env_id: EnvironmentId,
+        proc_id: ProcessId,
+    ) -> Self::ProcessPollFut {
         check_env_id!(env_id);
 
         ready(self.state.process_poll(&proc_id))
     }
 
     type ProcessWaitFut = Ready<Result<bool, AgentError>>;
-    fn process_wait(self, _: Context, env_id: EnvironmentId, proc_id: ProcessId, timeout: Option<u32>) -> Self::ProcessWaitFut {
+    fn process_wait(
+        self,
+        _: Context,
+        env_id: EnvironmentId,
+        proc_id: ProcessId,
+        timeout: Option<u32>,
+    ) -> Self::ProcessWaitFut {
         check_env_id!(env_id);
 
         ready(self.state.process_wait(&proc_id, timeout))
     }
 
     type ProcessReturncodeFut = Ready<Result<Option<u32>, AgentError>>;
-    fn process_returncode(self, _: Context, env_id: EnvironmentId, proc_id: ProcessId) -> Self::ProcessReturncodeFut {
+    fn process_returncode(
+        self,
+        _: Context,
+        env_id: EnvironmentId,
+        proc_id: ProcessId,
+    ) -> Self::ProcessReturncodeFut {
         check_env_id!(env_id);
 
         ready(self.state.process_exit_code(&proc_id))

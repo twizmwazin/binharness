@@ -35,7 +35,8 @@ fn main() -> anyhow::Result<()> {
 
     // Setup listener
     let mut listener = rt.block_on(async {
-        return tarpc::serde_transport::tcp::listen(&(args.address, args.port), Json::default).await;
+        return tarpc::serde_transport::tcp::listen(&(args.address, args.port), Json::default)
+            .await;
     })?;
     listener.config_mut().max_frame_length(usize::MAX);
 
