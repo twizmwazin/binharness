@@ -6,6 +6,17 @@ on:
     branches: [ main ]
 
 jobs:
+  cargo_checks:
+    name: Cargo checks
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Run cargo check
+        run: cargo check --all --all-targets --workspace
+      - name: Run cargo fmt check
+        run: cargo fmt --all -- --check
+
   build_server:
     name: Build server
     runs-on: ubuntu-22.04
