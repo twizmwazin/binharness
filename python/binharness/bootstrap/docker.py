@@ -17,15 +17,15 @@ class DockerAgent(AgentConnection):
     it allows managing the agent in a docker container.
     """
 
-    _client: docker.DockerClient
+    _docker_client: docker.DockerClient
     _container_id: str
 
     def __init__(self: DockerAgent, container_id: str, port: int) -> None:
         """Initialize a DockerAgent."""
-        self._client = docker.from_env()
+        self._docker_client = docker.from_env()
         self._container_id = container_id
 
-        container = self._client.containers.get(container_id)
+        container = self._docker_client.containers.get(container_id)
         ip_address = container.attrs["NetworkSettings"]["IPAddress"]
         super().__init__(ip_address, port)
 
@@ -34,12 +34,12 @@ class DockerAgent(AgentConnection):
         if self.container.status == "running":
             self.container.stop()
             self.container.remove()
-        self._client.close()
+        self._docker_client.close()
 
     @property
     def container(self: DockerAgent) -> docker.models.containers.Container:
         """Return the docker container."""
-        return self._client.containers.get(self._container_id)
+        return self._docker_client.containers.get(self._container_id)
 
 
 def _create_in_memory_tarfile(files: dict[str, str]) -> BinaryIO:
