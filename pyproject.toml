@@ -19,13 +19,16 @@ dev = [
     "coverage[toml]>=7.2.3",
     "docker>=7.0.0",
     "mypy>=1.2.0",
+    "paramiko>=3.4.0",
     "pre-commit>=3.2.2",
     "pytest>=7.3.1",
     "pytest-cov>=4.0.0",
     "pytest-mypy>=0.10.3",
     "ruff>=0.0.262",
+    "types-paramiko>=3.4.0"
 ]
 docker = ["docker>=7.0.0"]
+ssh = ["paramiko>=3.4.0"]
 
 [project.urls]
 homepage = "https://github.com/twizmwazin/binharness"
