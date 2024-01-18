@@ -17,6 +17,7 @@ dynamic = ["version"]
 dev = [
     "black>=23.3.0",
     "coverage[toml]>=7.2.3",
+    "docker>=7.0.0",
     "mypy>=1.2.0",
     "pre-commit>=3.2.2",
     "pytest>=7.3.1",
@@ -24,6 +25,7 @@ dev = [
     "pytest-mypy>=0.10.3",
     "ruff>=0.0.262",
 ]
+docker = ["docker>=7.0.0"]
 
 [project.urls]
 homepage = "https://github.com/twizmwazin/binharness"
@@ -38,8 +40,8 @@ strip = true
 sdist-generator = "cargo"
 
 [tool.pytest.ini_options]
-addopts = "--tb=native --cov=binharness --cov-report lcov:.lcov --cov-report term-missing --mypy"
-markers = ["linux", "darwin", "win32"]
+addopts = "-ra --cov=binharness --cov-report lcov:.lcov --cov-report term-missing --mypy"
+markers = ["linux", "darwin", "win32", "docker"]
 
 [tool.coverage.run]
 branch = true
@@ -74,6 +76,7 @@ required-imports = ["from __future__ import annotations"]
 [tool.ruff.per-file-ignores]
 "python/tests/*" = [
     "D",
+    "INP001",
     "S101",
 ]
 "**/*.pyi" = [
