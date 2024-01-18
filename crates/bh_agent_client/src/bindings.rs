@@ -131,24 +131,40 @@ impl BhAgentClient {
     fn process_poll(&self, env_id: EnvironmentId, proc_id: ProcessId) -> PyResult<Option<u32>> {
         run_in_runtime(
             self,
-            self.client.process_poll(context::current(), env_id, proc_id),
+            self.client
+                .process_poll(context::current(), env_id, proc_id),
         )
     }
 
-    fn process_wait(&self, env_id: EnvironmentId, proc_id: ProcessId, timeout: Option<f64>) -> PyResult<bool> {
+    fn process_wait(
+        &self,
+        env_id: EnvironmentId,
+        proc_id: ProcessId,
+        timeout: Option<f64>,
+    ) -> PyResult<bool> {
         run_in_runtime(
             self,
-            self.client.process_wait(context::current(), env_id, proc_id, match timeout {
-                Some(t) => Some((t * 1000.0) as u32),
-                None => None,
-            })
+            self.client.process_wait(
+                context::current(),
+                env_id,
+                proc_id,
+                match timeout {
+                    Some(t) => Some((t * 1000.0) as u32),
+                    None => None,
+                },
+            ),
         )
     }
 
-    fn process_returncode(&self, env_id: EnvironmentId, proc_id: ProcessId) -> PyResult<Option<u32>> {
+    fn process_returncode(
+        &self,
+        env_id: EnvironmentId,
+        proc_id: ProcessId,
+    ) -> PyResult<Option<u32>> {
         run_in_runtime(
             self,
-            self.client.process_returncode(context::current(), env_id, proc_id),
+            self.client
+                .process_returncode(context::current(), env_id, proc_id),
         )
     }
 
@@ -201,7 +217,12 @@ impl BhAgentClient {
         )
     }
 
-    fn file_read(&self, env_id: EnvironmentId, fd: FileId, num_bytes: Option<u32>) -> PyResult<Vec<u8>> {
+    fn file_read(
+        &self,
+        env_id: EnvironmentId,
+        fd: FileId,
+        num_bytes: Option<u32>,
+    ) -> PyResult<Vec<u8>> {
         run_in_runtime(
             self,
             self.client

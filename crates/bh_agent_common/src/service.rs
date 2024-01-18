@@ -23,11 +23,21 @@ pub trait BhAgentService {
         channel: ProcessChannel,
     ) -> Result<FileId, AgentError>;
 
-    async fn process_poll(env_id: EnvironmentId, proc_id: ProcessId) -> Result<Option<u32>, AgentError>;
+    async fn process_poll(
+        env_id: EnvironmentId,
+        proc_id: ProcessId,
+    ) -> Result<Option<u32>, AgentError>;
 
-    async fn process_wait(env_id: EnvironmentId, proc_id: ProcessId, timeout: Option<u32>) -> Result<bool, AgentError>;
+    async fn process_wait(
+        env_id: EnvironmentId,
+        proc_id: ProcessId,
+        timeout: Option<u32>,
+    ) -> Result<bool, AgentError>;
 
-    async fn process_returncode(env_id: EnvironmentId, proc_id: ProcessId) -> Result<Option<u32>, AgentError>;
+    async fn process_returncode(
+        env_id: EnvironmentId,
+        proc_id: ProcessId,
+    ) -> Result<Option<u32>, AgentError>;
 
     // File IO
     // Implement most of the methods in binharness.IO, but omit ones that there can just be

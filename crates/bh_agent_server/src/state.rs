@@ -10,7 +10,7 @@ use std::time::Duration;
 use subprocess::{Popen, PopenConfig};
 
 use bh_agent_common::AgentError::{
-    InvalidFileDescriptor, InvalidProcessId, IoError, ProcessStartFailure, Unknown
+    InvalidFileDescriptor, InvalidProcessId, IoError, ProcessStartFailure, Unknown,
 };
 use bh_agent_common::{
     AgentError, FileId, FileOpenMode, FileOpenType, ProcessChannel, ProcessId, Redirection,
@@ -252,7 +252,11 @@ impl BhAgentState {
         }
     }
 
-    pub fn process_wait(&self, proc_id: &ProcessId, timeout: Option<u32>) -> Result<bool, AgentError> {
+    pub fn process_wait(
+        &self,
+        proc_id: &ProcessId,
+        timeout: Option<u32>,
+    ) -> Result<bool, AgentError> {
         trace!("Waiting for process {}", proc_id);
         // This is implemented as a busy loop to avoid holding the write lock
         // for too long. Open to suggestions on how to improve this.
