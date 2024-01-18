@@ -70,19 +70,18 @@ impl BhAgentState {
         Ok(modes.contains(
             self.file_modes
                 .read()?
-                .get(&fd)
+                .get(fd)
                 .ok_or(InvalidFileDescriptor)?,
         ))
     }
 
     pub fn file_type(&self, fd: &FileId) -> Result<FileOpenType, AgentError> {
         trace!("Getting file type for {}", fd);
-        Ok(self
-            .file_types
+        self.file_types
             .read()?
-            .get(&fd)
+            .get(fd)
             .ok_or(InvalidFileDescriptor)
-            .and_then(|t| Ok(t.clone()))?)
+            .map(|t| *t)
     }
 
     pub fn open_path(
@@ -148,7 +147,7 @@ impl BhAgentState {
             config
                 .argv
                 .iter()
-                .map(|s| OsStr::new(s))
+                .map(OsStr::new)
                 .collect::<Vec<_>>()
                 .as_slice(),
             popenconfig,
@@ -213,23 +212,19 @@ impl BhAgentState {
             ProcessChannel::Stderr => &self.proc_stderr_ids,
         };
 
-        channel_ids
-            .read()?
-            .get_by_left(&proc_id)
-            .map(|i| i.clone())
-            .ok_or((|| {
-                debug!("Failed to get process channel");
-                debug!("Process ID: {}", proc_id);
-                debug!("Channel: {:?}", channel);
-                let proc_is_valid = self.processes.read().unwrap().contains_key(&proc_id);
-                debug!("Process is valid: {}", proc_is_valid);
-                debug!(
-                    "Process with valid channels: {:?}",
-                    channel_ids.read().unwrap().left_values()
-                );
+        channel_ids.read()?.get_by_left(proc_id).copied().ok_or({
+            debug!("Failed to get process channel");
+            debug!("Process ID: {}", proc_id);
+            debug!("Channel: {:?}", channel);
+            let proc_is_valid = self.processes.read().unwrap().contains_key(proc_id);
+            debug!("Process is valid: {}", proc_is_valid);
+            debug!(
+                "Process with valid channels: {:?}",
+                channel_ids.read().unwrap().left_values()
+            );
 
-                InvalidProcessId
-            })())
+            InvalidProcessId
+        })
     }
 
     pub fn process_poll(&self, proc_id: &ProcessId) -> Result<Option<u32>, AgentError> {
@@ -237,14 +232,14 @@ impl BhAgentState {
         let proc = self
             .processes
             .read()?
-            .get(&proc_id)
+            .get(proc_id)
             .ok_or(InvalidProcessId)?
             .clone();
         let exit_status = proc.write()?.poll();
         match exit_status {
             None => Ok(None),
             Some(status) => match status {
-                subprocess::ExitStatus::Exited(code) => Ok(Some(code as u32)),
+                subprocess::ExitStatus::Exited(code) => Ok(Some(code)),
                 subprocess::ExitStatus::Signaled(code) => Ok(Some(code as u32)),
                 subprocess::ExitStatus::Other(code) => Ok(Some(code as u32)),
                 subprocess::ExitStatus::Undetermined => Err(Unknown),
@@ -280,7 +275,7 @@ impl BhAgentState {
         let proc = self
             .processes
             .read()?
-            .get(&proc_id)
+            .get(proc_id)
             .ok_or(InvalidProcessId)?
             .clone();
         let exit_status = proc.read()?.exit_status();
@@ -297,16 +292,17 @@ impl BhAgentState {
 
     pub fn close_file(&self, fd: &FileId) -> Result<(), AgentError> {
         trace!("Closing file {}", fd);
-        Ok(drop(
+        drop(
             self.files
                 .write()?
-                .remove(&fd)
+                .remove(fd)
                 .ok_or(InvalidFileDescriptor)?,
-        ))
+        );
+        Ok(())
     }
 
     pub fn is_file_closed(&self, fd: &FileId) -> Result<bool, AgentError> {
-        Ok(self.files.read()?.contains_key(&fd))
+        Ok(self.files.read()?.contains_key(fd))
     }
 
     pub fn do_mut_operation<R: Sized>(
@@ -324,7 +320,7 @@ impl BhAgentState {
         }
 
         // If these unwraps fail, the state is bad
-        if let Some(pid) = self.proc_stdin_ids.read()?.get_by_right(&fd) {
+        if let Some(pid) = self.proc_stdin_ids.read()?.get_by_right(fd) {
             let procs_binding = self.processes.read()?;
             let mut proc_binding = procs_binding.get(pid).unwrap().write()?;
             let file = proc_binding.stdin.as_mut().unwrap();
@@ -332,7 +328,7 @@ impl BhAgentState {
         } else {
             trace!("Process stdin id map: {:?}", self.proc_stdin_ids.read()?);
         }
-        if let Some(pid) = self.proc_stdout_ids.read()?.get_by_right(&fd) {
+        if let Some(pid) = self.proc_stdout_ids.read()?.get_by_right(fd) {
             let procs_binding = self.processes.read()?;
             let mut proc_binding = procs_binding.get(pid).unwrap().write()?;
             let file = proc_binding.stdout.as_mut().unwrap();
@@ -340,7 +336,7 @@ impl BhAgentState {
         } else {
             trace!("Process stdout id map: {:?}", self.proc_stdout_ids.read()?);
         }
-        if let Some(pid) = self.proc_stderr_ids.read()?.get_by_right(&fd) {
+        if let Some(pid) = self.proc_stderr_ids.read()?.get_by_right(fd) {
             let procs_binding = self.processes.read()?;
             let mut proc_binding = procs_binding.get(pid).unwrap().write()?;
             let file = proc_binding.stderr.as_mut().unwrap();
