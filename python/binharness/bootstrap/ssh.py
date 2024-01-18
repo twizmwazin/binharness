@@ -1,9 +1,32 @@
 """binharness.bootstrap.ssh - SSH bootstrap module for binharness."""
 from __future__ import annotations
 
+import time
+
 import paramiko
 
 from binharness.agentenvironment import AgentConnection
+
+
+class SSHAgent(AgentConnection):
+    """SSHAgent implements the AgentConnection interface for agents over SSH.
+
+    It provides the same interface as a standard AgentConnection, but adds
+    functions for managing the lifecycle of the agent.
+    """
+
+    _ssh_client: paramiko.SSHClient
+
+    def __init__(
+        self: SSHAgent, ssh_client: paramiko.SSHClient, host: str, port: int
+    ) -> None:
+        """Create an AgentConnection."""
+        super().__init__(host, port)
+        self._ssh_client = ssh_client
+
+    def stop(self: SSHAgent) -> None:
+        """Shutdown the agent."""
+        self._ssh_client.exec_command("kill $(cat /tmp/bh_agent_server.pid)")
 
 
 def bootstrap_ssh_environment_with_client(
@@ -12,10 +35,12 @@ def bootstrap_ssh_environment_with_client(
     ip: str,
     port: int = 60162,
     install_path: str = "bh_agent_server",
-) -> AgentConnection:
+) -> SSHAgent:
     """Bootstraps an agent running on a box over ssh.
 
-    Currently assumes the remote box is running Linux.
+    Currently assumes the remote box is running Linux or macOS. A reference to
+    the ssh client is held to allow management of the agent process. If the
+    client is closed, the management functions will no longer work.
     """
     # Copy the agent binary over
     sftp_client = ssh_client.open_sftp()
@@ -27,9 +52,10 @@ def bootstrap_ssh_environment_with_client(
 
     # Start the agent
     _, stdout, _ = ssh_client.exec_command(f"{install_path} -d {ip} {port}")
+    time.sleep(1)  # TODO: This is a hack to wait for the agent to start
 
     # Create the agent connection
-    return AgentConnection(ip, port)
+    return SSHAgent(ssh_client, ip, port)
 
 
 def bootstrap_ssh_environment(
@@ -37,7 +63,7 @@ def bootstrap_ssh_environment(
     ip: str,
     port: int = 60162,
     username: str = "root",
-) -> AgentConnection:
+) -> SSHAgent:
     """Bootstraps an agent running on a box over ssh.
 
     Currently assumes the remote box is running Linux. If you need more control

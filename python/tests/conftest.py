@@ -35,6 +35,16 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
 
 
 @pytest.fixture()
+def agent_binary_host() -> str:
+    expected_path = (
+        Path(__file__).parent.parent.parent / "target" / "debug" / "bh_agent_server"
+    ).absolute()
+    if not expected_path.exists():
+        pytest.skip("agent binary not found")
+    return str(expected_path)
+
+
+@pytest.fixture()
 def agent_binary_linux_host_arch() -> str:
     arch = platform.machine()
     # Fixup arch for arm64
