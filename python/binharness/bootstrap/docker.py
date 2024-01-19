@@ -58,6 +58,7 @@ def bootstrap_env_from_image(
     image: str,
     port: int = 60162,
     client: docker.DockerClient | None = None,
+    agent_log: str | None = None,
 ) -> DockerAgent:
     """Bootstraps an agent running in a docker container."""
     user_client = client is not None
@@ -66,9 +67,13 @@ def bootstrap_env_from_image(
     try:
         # Setup container
         client.images.pull(image)
+        environment = {}
+        if agent_log is not None:
+            environment["RUST_LOG"] = agent_log
         container = client.containers.create(
             image,
             command=["/agent", "0.0.0.0", str(port)],  # noqa: S104
+            environment=environment,
         )
         # Transfer agent binary to container
         archive = _create_in_memory_tarfile({agent_binary: "agent"})
