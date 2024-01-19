@@ -7,16 +7,16 @@ use thiserror::Error;
 pub enum AgentError {
     #[error("Invalid environment ID")]
     InvalidEnvironmentId,
-    #[error("IO Error")]
-    IoError,
+    #[error("IO Error: {0}")]
+    IoError(String),
     #[error("Invalid file ID")]
     InvalidFileDescriptor,
     #[error("Invalid seek whence")]
     InvalidSeekWhence,
     #[error("Lock Error")]
     LockError,
-    #[error("Failed to start process")]
-    ProcessStartFailure,
+    #[error("Failed to start process: {0}")]
+    ProcessStartFailure(String),
     #[error("Invalid process ID")]
     InvalidProcessId,
     #[error("Process channel not piped")]

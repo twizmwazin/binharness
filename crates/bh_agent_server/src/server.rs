@@ -178,7 +178,7 @@ impl BhAgentService for BhAgentServer {
                 .do_mut_operation(&fd, |file| {
                     read_generic(file, num_bytes, self.state.file_type(&fd)?)
                 })
-                .and_then(|v| v.map_err(|_| IoError)),
+                .and_then(|v| v.map_err(|e| IoError(e.to_string()))),
         )
     }
 
@@ -195,7 +195,9 @@ impl BhAgentService for BhAgentServer {
         // TODO: support hint
         ready(
             self.state
-                .do_mut_operation(&fd, |file| read_lines(file).map_err(|_| IoError))
+                .do_mut_operation(&fd, |file| {
+                    read_lines(file).map_err(|e| IoError(e.to_string()))
+                })
                 .and_then(|r| r),
         )
     }
