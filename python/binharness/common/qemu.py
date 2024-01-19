@@ -31,9 +31,7 @@ class QemuInjection(ExecutableInjection):
     def __init__(self: QemuInjection, arch: str | None = None) -> None:
         """Create a QemuInjection."""
         self.arch = arch if arch is not None else _get_qemu_host_arch()
-        super().__init__(
-            Path(f"qemu-{self.arch}-static"), Path(f"/usr/bin/qemu-{self.arch}-static")
-        )
+        super().__init__(Path(Path(f"/usr/bin/qemu-{self.arch}-static")))
 
     def run_with_log(
         self: QemuInjection,
