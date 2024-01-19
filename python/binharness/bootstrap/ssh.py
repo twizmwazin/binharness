@@ -51,7 +51,9 @@ def bootstrap_ssh_environment_with_client(  # noqa: PLR0913
     ssh_client.exec_command(f"chmod +x {install_path}")
 
     # Start the agent
-    _, stdout, _ = ssh_client.exec_command(f"{install_path} {listen_ip} {listen_port}")
+    _, stdout, _ = ssh_client.exec_command(
+        f"{install_path} -d {listen_ip} {listen_port}"
+    )
 
     # Create the agent connection
     return SSHAgent(ssh_client, connect_ip, connect_port)
