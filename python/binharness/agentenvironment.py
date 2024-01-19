@@ -192,11 +192,22 @@ class AgentEnvironment(Environment):
     def inject_files(self: AgentEnvironment, files: list[tuple[Path, Path]]) -> None:
         """Inject files into the environment."""
         for src, dst in files:
+            self.run_command(
+                "mkdir",  # TODO: Native mkdir function
+                "-p",
+                str(dst.parent),
+            ).wait()
             fd = self._client.file_open(self._id, str(dst), "wb")
             with src.open("rb") as f:
                 while chunk := f.read(4096):
                     self._client.file_write(self._id, fd, chunk)
             self._client.file_close(self._id, fd)
+            local_attrs = src.stat()
+            self.run_command(
+                "chmod",  # TODO: Native chmod function
+                str(oct(local_attrs.st_mode))[-3:],
+                str(dst),
+            ).wait()
 
     def retrieve_files(self: AgentEnvironment, files: list[tuple[Path, Path]]) -> None:
         """Retrieve files from the environment."""
