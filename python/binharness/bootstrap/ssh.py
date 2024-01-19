@@ -1,8 +1,6 @@
 """binharness.bootstrap.ssh - SSH bootstrap module for binharness."""
 from __future__ import annotations
 
-import time
-
 import paramiko
 
 from binharness.agentenvironment import AgentConnection
@@ -29,11 +27,13 @@ class SSHAgent(AgentConnection):
         self._ssh_client.exec_command("kill $(cat /tmp/bh_agent_server.pid)")
 
 
-def bootstrap_ssh_environment_with_client(
+def bootstrap_ssh_environment_with_client(  # noqa: PLR0913
     agent_binary: str,
     ssh_client: paramiko.SSHClient,
-    ip: str,
-    port: int = 60162,
+    connect_ip: str,
+    listen_ip: str = "0.0.0.0",  # noqa: S104
+    listen_port: int = 60162,
+    connect_port: int = 60162,
     install_path: str = "bh_agent_server",
 ) -> SSHAgent:
     """Bootstraps an agent running on a box over ssh.
@@ -51,11 +51,10 @@ def bootstrap_ssh_environment_with_client(
     ssh_client.exec_command(f"chmod +x {install_path}")
 
     # Start the agent
-    _, stdout, _ = ssh_client.exec_command(f"{install_path} -d {ip} {port}")
-    time.sleep(1)  # TODO: This is a hack to wait for the agent to start
+    _, stdout, _ = ssh_client.exec_command(f"{install_path} {listen_ip} {listen_port}")
 
     # Create the agent connection
-    return SSHAgent(ssh_client, ip, port)
+    return SSHAgent(ssh_client, connect_ip, connect_port)
 
 
 def bootstrap_ssh_environment(
@@ -79,4 +78,6 @@ def bootstrap_ssh_environment(
     ssh_client.connect(ip, username=username)
 
     # Bootstrap the environment
-    return bootstrap_ssh_environment_with_client(agent_binary, ssh_client, ip, port)
+    return bootstrap_ssh_environment_with_client(
+        agent_binary, ssh_client, ip, listen_port=port, connect_port=port
+    )

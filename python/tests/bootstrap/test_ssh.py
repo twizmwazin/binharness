@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Generator
 import mockssh
 import pytest
 
-from binharness.agentenvironment import AgentConnection
 from binharness.bootstrap.ssh import bootstrap_ssh_environment_with_client
 from binharness.types.executor import NullExecutor
 from binharness.types.target import Target
@@ -40,11 +39,10 @@ def test_bootstrap_ssh_environment_with_client(
     )
 
     try:
-        assert isinstance(agent, AgentConnection)
         assert agent.get_environment_ids() == [0]
 
         env = agent.get_environment(0)
-        target = Target(env, Path("/usr/bin/echo"), args=["hello world"])
+        target = Target(env, Path("/bin/echo"), args=["hello world"])
         proc = NullExecutor().run_target(target)
 
         proc.wait()
