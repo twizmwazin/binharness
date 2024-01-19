@@ -285,6 +285,7 @@ impl BhAgentClient {
 
 #[pymodule]
 pub fn bh_agent_client(_py: Python, m: &PyModule) -> PyResult<()> {
+    pyo3_log::init();
     m.add_class::<BhAgentClient>()?;
     Ok(())
 }
