@@ -19,7 +19,7 @@ def test_inject_true() -> None:
     true_injection = Injection(Path("/usr/bin/true"), None)
     true_injection.install(env)
     assert true_injection.env_path is not None
-    assert (true_injection.env_path / "true").is_file()
+    assert true_injection.env_path.is_file()
 
 
 @pytest.mark.linux()
@@ -28,8 +28,7 @@ def test_inject_true_executable() -> None:
     true_injection = ExecutableInjection(Path("true"), Path("/usr/bin/true"))
     true_injection.install(env)
     assert true_injection.env_path is not None
-    assert true_injection.env_path.is_dir()
-    assert (true_injection.env_path / "true").is_file()
+    assert true_injection.env_path.is_file()
     assert true_injection.is_installed()
     assert true_injection.env_path.stat().st_mode & 0o111 != 0
     assert true_injection.run().wait() == 0
