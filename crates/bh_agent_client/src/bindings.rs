@@ -4,6 +4,7 @@ use bh_agent_common::{
     AgentError, BhAgentServiceClient, EnvironmentId, FileId, FileOpenMode, FileOpenType,
     ProcessChannel, ProcessId, Redirection, RemotePOpenConfig,
 };
+use log::debug;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use pyo3::{pyclass, pymethods, pymodule, PyResult, Python};
@@ -36,6 +37,8 @@ where
 impl BhAgentClient {
     #[staticmethod]
     fn initialize_client(ip_addr: String, port: u16) -> PyResult<Self> {
+        debug!("Initializing client with {}:{}", ip_addr, port);
+
         let ip_addr = IpAddr::from_str(&ip_addr)?;
         let socket_addr = SocketAddr::new(ip_addr, port);
 
@@ -56,12 +59,16 @@ impl BhAgentClient {
     }
 
     fn get_environments(&self) -> PyResult<Vec<EnvironmentId>> {
+        debug!("Getting environments");
+
         self.tokio_runtime
             .block_on(self.client.get_environments(context::current()))
             .map_err(|e| PyRuntimeError::new_err(e.to_string()))
     }
 
     fn get_tempdir(&self, env_id: EnvironmentId) -> PyResult<String> {
+        debug!("Getting tempdir for environment {}", env_id);
+
         run_in_runtime(self, self.client.get_tempdir(context::current(), env_id))
     }
 
@@ -79,6 +86,19 @@ impl BhAgentClient {
         setgid: Option<u32>,
         setpgid: bool,
     ) -> PyResult<ProcessId> {
+        debug!(
+            "Running process with argv {:?}, stdin {}, stdout {}, stderr {}, executable {:?}, env {:?}, cwd {:?}, setuid {:?}, setgid {:?}, setpgid {}",
+            argv,
+            stdin,
+            stdout,
+            stderr,
+            executable,
+            env,
+            cwd,
+            setuid,
+            setgid,
+            setpgid,);
+
         let config = RemotePOpenConfig {
             argv,
             stdin: match stdin {
@@ -112,6 +132,11 @@ impl BhAgentClient {
         proc_id: ProcessId,
         channel: i32, // TODO: This is just 0, 1, 2 for now
     ) -> PyResult<FileId> {
+        debug!(
+            "Getting process channel for environment {}, process {}, channel {}",
+            env_id, proc_id, channel
+        );
+
         run_in_runtime(
             self,
             self.client.get_process_channel(
@@ -129,6 +154,11 @@ impl BhAgentClient {
     }
 
     fn process_poll(&self, env_id: EnvironmentId, proc_id: ProcessId) -> PyResult<Option<u32>> {
+        debug!(
+            "Polling process for environment {}, process {}",
+            env_id, proc_id
+        );
+
         run_in_runtime(
             self,
             self.client
@@ -142,6 +172,11 @@ impl BhAgentClient {
         proc_id: ProcessId,
         timeout: Option<f64>,
     ) -> PyResult<bool> {
+        debug!(
+            "Waiting for process for environment {}, process {}, timeout {:?}",
+            env_id, proc_id, timeout
+        );
+
         run_in_runtime(
             self,
             self.client.process_wait(
@@ -161,6 +196,11 @@ impl BhAgentClient {
         env_id: EnvironmentId,
         proc_id: ProcessId,
     ) -> PyResult<Option<u32>> {
+        debug!(
+            "Getting process returncode for environment {}, process {}",
+            env_id, proc_id
+        );
+
         run_in_runtime(
             self,
             self.client
@@ -175,6 +215,11 @@ impl BhAgentClient {
         path: String,
         mode_and_type: String,
     ) -> PyResult<FileId> {
+        debug!(
+            "Opening file for environment {}, path {}, mode_and_type {}",
+            env_id, path, mode_and_type
+        );
+
         // Mode parsing
         let mut mode = FileOpenMode::Read;
         mode_and_type.chars().for_each(|c| match c {
@@ -200,10 +245,17 @@ impl BhAgentClient {
     }
 
     fn file_close(&self, env_id: EnvironmentId, fd: FileId) -> PyResult<()> {
+        debug!("Closing file for environment {}, fd {}", env_id, fd);
+
         run_in_runtime(self, self.client.file_close(context::current(), env_id, fd))
     }
 
     fn file_is_closed(&self, env_id: EnvironmentId, fd: FileId) -> PyResult<bool> {
+        debug!(
+            "Checking if file is closed for environment {}, fd {}",
+            env_id, fd
+        );
+
         run_in_runtime(
             self,
             self.client.file_is_closed(context::current(), env_id, fd),
@@ -211,6 +263,11 @@ impl BhAgentClient {
     }
 
     fn file_is_readable(&self, env_id: EnvironmentId, fd: FileId) -> PyResult<bool> {
+        debug!(
+            "Checking if file is readable for environment {}, fd {}",
+            env_id, fd
+        );
+
         run_in_runtime(
             self,
             self.client.file_is_readable(context::current(), env_id, fd),
@@ -223,6 +280,11 @@ impl BhAgentClient {
         fd: FileId,
         num_bytes: Option<u32>,
     ) -> PyResult<Vec<u8>> {
+        debug!(
+            "Reading file for environment {}, fd {}, num_bytes {:?}",
+            env_id, fd, num_bytes
+        );
+
         run_in_runtime(
             self,
             self.client
@@ -236,6 +298,11 @@ impl BhAgentClient {
         fd: FileId,
         hint: u32,
     ) -> PyResult<Vec<Vec<u8>>> {
+        debug!(
+            "Reading file lines for environment {}, fd {}, hint {}",
+            env_id, fd, hint
+        );
+
         run_in_runtime(
             self,
             self.client
@@ -244,6 +311,11 @@ impl BhAgentClient {
     }
 
     fn file_is_seekable(&self, env_id: EnvironmentId, fd: FileId) -> PyResult<bool> {
+        debug!(
+            "Checking if file is seekable for environment {}, fd {}",
+            env_id, fd
+        );
+
         run_in_runtime(
             self,
             self.client.file_is_seekable(context::current(), env_id, fd),
@@ -257,6 +329,11 @@ impl BhAgentClient {
         offset: i32,
         whence: i32,
     ) -> PyResult<()> {
+        debug!(
+            "Seeking file for environment {}, fd {}, offset {}, whence {}",
+            env_id, fd, offset, whence
+        );
+
         run_in_runtime(
             self,
             self.client
@@ -265,10 +342,17 @@ impl BhAgentClient {
     }
 
     fn file_tell(&self, env_id: EnvironmentId, fd: FileId) -> PyResult<i32> {
+        debug!("Telling file for environment {}, fd {}", env_id, fd);
+
         run_in_runtime(self, self.client.file_tell(context::current(), env_id, fd))
     }
 
     fn file_is_writable(&self, env_id: EnvironmentId, fd: FileId) -> PyResult<bool> {
+        debug!(
+            "Checking if file is writable for environment {}, fd {}",
+            env_id, fd
+        );
+
         run_in_runtime(
             self,
             self.client.file_is_writable(context::current(), env_id, fd),
@@ -276,6 +360,11 @@ impl BhAgentClient {
     }
 
     fn file_write(&self, env_id: EnvironmentId, fd: FileId, data: Vec<u8>) -> PyResult<()> {
+        debug!(
+            "Writing file for environment {}, fd {}, data {:?}",
+            env_id, fd, data
+        );
+
         run_in_runtime(
             self,
             self.client.file_write(context::current(), env_id, fd, data),
