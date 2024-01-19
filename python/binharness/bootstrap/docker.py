@@ -31,9 +31,6 @@ class DockerAgent(AgentConnection):
 
     def __del__(self: DockerAgent) -> None:
         """__del__ is overridden to ensure that the docker client is closed."""
-        if self.container.status == "running":
-            self.container.stop()
-            self.container.remove()
         self._docker_client.close()
 
     @property
