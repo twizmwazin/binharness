@@ -54,12 +54,12 @@ def bootstrap_env_from_image(
     agent_binary: str,
     image: str,
     port: int = 60162,
-    client: docker.DockerClient | None = None,
+    docker_client: docker.DockerClient | None = None,
     agent_log: str | None = None,
 ) -> DockerAgent:
     """Bootstraps an agent running in a docker container."""
-    user_client = client is not None
-    if client is None:
+    user_client = docker_client is not None
+    if docker_client is None:
         client = docker.from_env()
     try:
         # Setup container

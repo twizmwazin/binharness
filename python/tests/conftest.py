@@ -6,6 +6,12 @@ from pathlib import Path
 
 import pytest
 
+try:
+    import docker
+except ImportError:
+    docker = None
+
+
 ALL = {"darwin", "linux", "win32"}
 
 
@@ -45,3 +51,13 @@ def agent_binary_linux_host_arch() -> str:
     if not expected_path.exists():
         pytest.skip("agent binary not found")
     return str(expected_path)
+
+
+@pytest.fixture()
+def docker_client() -> docker.DockerClient:
+    if docker is None:
+        pytest.skip("docker is not installed")
+    try:
+        return docker.from_env()
+    except docker.errors.DockerException:
+        pytest.skip("docker is not running")
