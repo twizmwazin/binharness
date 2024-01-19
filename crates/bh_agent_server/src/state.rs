@@ -101,7 +101,7 @@ impl BhAgentState {
         let file = open_opts.open(&path).map_err(|e| {
             eprintln!("Path: {}", path);
             eprintln!("Error opening file: {}", e);
-            IoError
+            IoError(e.to_string())
         })?;
         let file_id = self.take_file_id()?;
         self.files
@@ -152,7 +152,7 @@ impl BhAgentState {
                 .as_slice(),
             popenconfig,
         )
-        .map_err(|_| ProcessStartFailure)?;
+        .map_err(|e| ProcessStartFailure(e.to_string()))?;
 
         let proc_id = self.take_proc_id()?;
 
