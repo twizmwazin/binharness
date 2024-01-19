@@ -51,9 +51,7 @@ class Injection:
                 f"{self.host_path.name}-{generate_random_suffix()}.bh-inj"
             )
 
-        environment.inject_files(
-            [(self.host_path, self.env_path / self.host_path.name)]
-        )
+        environment.inject_files([(self.host_path, self.env_path)])
         self._environment = environment
 
     def is_installed(self: Injection) -> bool:
