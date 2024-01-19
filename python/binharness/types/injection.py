@@ -96,7 +96,7 @@ class ExecutableInjection(Injection):
         if self._environment is None or self.env_path is None:
             raise InjectionNotInstalledError
         return self._environment.run_command(
-            [self.env_path / self.executable, *args],
+            [self.env_path, *args],
             env=env,
             cwd=cwd,
         )
