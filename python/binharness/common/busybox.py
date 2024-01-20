@@ -23,7 +23,7 @@ class BusyboxInjection(ExecutableInjection):
 
     def __init__(self: BusyboxInjection) -> None:
         """Create a BusyboxInjection."""
-        super().__init__(Path("busybox"), self.BUSYBOX_PATH, None)
+        super().__init__(self.BUSYBOX_PATH)
 
     def install(self: BusyboxInjection, environment: Environment) -> None:
         """Install the injection into an environment."""

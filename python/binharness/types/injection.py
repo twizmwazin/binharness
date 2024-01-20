@@ -51,9 +51,7 @@ class Injection:
                 f"{self.host_path.name}-{generate_random_suffix()}.bh-inj"
             )
 
-        environment.inject_files(
-            [(self.host_path, self.env_path / self.host_path.name)]
-        )
+        environment.inject_files([(self.host_path, self.env_path)])
         self._environment = environment
 
     def is_installed(self: Injection) -> bool:
@@ -76,17 +74,26 @@ class ExecutableInjection(Injection):
     environment.
     """
 
-    executable: Path
+    _executable: Path | None
 
     def __init__(
         self: ExecutableInjection,
-        executable: Path,
         host_path: Path,
         env_path: Path | None = None,
+        executable: Path | None = None,
     ) -> None:
         """Create an ExecutableInjection."""
         super().__init__(host_path, env_path)
-        self.executable = executable
+        self._executable = executable
+
+    @property
+    def executable(self: ExecutableInjection) -> Path:
+        """Return the executable path."""
+        if self.host_path is not None:
+            if self._executable is None:
+                return self.host_path
+            return self.host_path / self._executable
+        raise InjectionNotInstalledError
 
     def run(
         self: ExecutableInjection,
@@ -98,7 +105,7 @@ class ExecutableInjection(Injection):
         if self._environment is None or self.env_path is None:
             raise InjectionNotInstalledError
         return self._environment.run_command(
-            [self.env_path / self.executable, *args],
+            [self.executable, *args],
             env=env,
             cwd=cwd,
         )
