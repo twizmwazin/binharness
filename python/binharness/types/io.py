@@ -1,10 +1,13 @@
 """binharness.types.io - Type definition for file-like objects."""
 from __future__ import annotations
 
-from typing import AnyStr, Protocol
+from typing import TYPE_CHECKING, AnyStr, ContextManager, Protocol
+
+if TYPE_CHECKING:
+    from types import TracebackType
 
 
-class IO(Protocol[AnyStr]):
+class IO(ContextManager["IO[AnyStr]"], Protocol[AnyStr]):
     """A file-like object."""
 
     def close(self: IO[AnyStr]) -> None:
@@ -46,3 +49,17 @@ class IO(Protocol[AnyStr]):
 
     def writelines(self: IO[AnyStr], lines: list[AnyStr]) -> None:
         """Write lines to the file."""
+
+    def __enter__(self: IO[AnyStr]) -> IO[AnyStr]:
+        """Enter the runtime context related to this object."""
+        return self
+
+    def __exit__(
+        self: IO[AnyStr],
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        """Exit the runtime context and close the file if it's open."""
+        if not self.closed:
+            self.close()
