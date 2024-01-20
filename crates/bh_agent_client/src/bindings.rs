@@ -361,8 +361,10 @@ impl BhAgentClient {
 
     fn file_write(&self, env_id: EnvironmentId, fd: FileId, data: Vec<u8>) -> PyResult<()> {
         debug!(
-            "Writing file for environment {}, fd {}, data {:?}",
-            env_id, fd, data
+            "Writing file for environment {}, fd {}, data length {:?}",
+            env_id,
+            fd,
+            data.len()
         );
 
         run_in_runtime(
