@@ -60,14 +60,14 @@ def bootstrap_env_from_image(
     """Bootstraps an agent running in a docker container."""
     user_client = docker_client is not None
     if docker_client is None:
-        client = docker.from_env()
+        docker_client = docker.from_env()
     try:
         # Setup container
-        client.images.pull(image)
+        docker_client.images.pull(image)
         environment = {}
         if agent_log is not None:
             environment["RUST_LOG"] = agent_log
-        container = client.containers.create(
+        container = docker_client.containers.create(
             image,
             command=["/agent", "0.0.0.0", str(port)],  # noqa: S104
             environment=environment,
@@ -83,4 +83,4 @@ def bootstrap_env_from_image(
         return DockerAgent(container.id, port)
     finally:
         if not user_client:
-            client.close()
+            docker_client.close()
