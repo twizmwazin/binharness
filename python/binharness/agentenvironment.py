@@ -199,7 +199,7 @@ class AgentEnvironment(Environment):
             ).wait()
             fd = self._client.file_open(self._id, str(dst), "wb")
             with src.open("rb") as f:
-                while chunk := f.read(4096):
+                while chunk := f.read(4194304):  # 4MB
                     self._client.file_write(self._id, fd, chunk)
             self._client.file_close(self._id, fd)
             local_attrs = src.stat()
