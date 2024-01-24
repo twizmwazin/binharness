@@ -13,9 +13,9 @@ use bh_agent_common::{
 use bh_agent_common::{AgentError::*, UserId};
 
 use crate::state::BhAgentState;
-use crate::util::{read_generic, read_lines};
 #[cfg(target_family = "unix")]
 use crate::util::{chmod, chown};
+use crate::util::{read_generic, read_lines};
 
 macro_rules! check_env_id {
     ($env_id:expr) => {
