@@ -204,11 +204,7 @@ class AgentEnvironment(Environment):
                     self._client.file_write(self._id, fd, chunk)
             self._client.file_close(self._id, fd)
             local_attrs = src.stat()
-            self.run_command(
-                "chmod",  # TODO: Native chmod function
-                str(oct(local_attrs.st_mode))[-3:],
-                str(dst),
-            ).wait()
+            self.chmod(dst, local_attrs.st_mode)
 
     def retrieve_files(self: AgentEnvironment, files: list[tuple[Path, Path]]) -> None:
         """Retrieve files from the environment."""
