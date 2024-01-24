@@ -1,6 +1,6 @@
-use std::net::IpAddr;
+use std::{net::IpAddr, process::exit};
 
-use clap::Parser;
+use argh::FromArgs;
 use futures::{future, prelude::*};
 use tarpc::{
     server::{self, Channel},
@@ -11,21 +11,24 @@ use tokio::runtime;
 use bh_agent_common::BhAgentService;
 use bh_agent_server::BhAgentServer;
 
-#[derive(Parser)]
-#[command(author, version, about, long_about = None)]
+#[derive(FromArgs)]
+/// bh_agent_server
 struct Args {
-    /// The address to listen on
+    /// address to listen on
+    #[argh(positional)]
     address: IpAddr,
-    /// The port to listen on
+    /// port to listen on
+    #[argh(positional)]
     port: u16,
     #[cfg(not(target_os = "windows"))]
-    #[arg(short, long, default_value = "false", help = "Daemonize the process")]
+    /// daemonize the process
+    #[argh(option, default = "false")]
     daemonize: bool,
 }
 
 fn main() -> anyhow::Result<()> {
     env_logger::init();
-    let args = Args::parse();
+    let args = argh::from_env::<Args>();
 
     // Setup runtime
     let rt = runtime::Builder::new_multi_thread()
