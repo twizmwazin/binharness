@@ -228,6 +228,14 @@ class AgentEnvironment(Environment):
         fd = self._client.file_open(self._id, str(path), mode)
         return AgentIO(self._client, self._id, fd)
 
+    def chown(self: AgentEnvironment, path: Path, user: str, group: str) -> None:
+        """Change the owner of a file."""
+        self._client.chown(self._id, str(path), user, group)
+
+    def chmod(self: AgentEnvironment, path: Path, mode: int) -> None:
+        """Change the mode of a file."""
+        self._client.chmod(self._id, str(path), mode)
+
 
 class AgentConnection:
     """AgentConnection represents a connection to an agent.

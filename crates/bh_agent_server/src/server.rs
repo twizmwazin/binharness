@@ -6,14 +6,14 @@ use std::sync::Arc;
 use anyhow::Result;
 use tarpc::context::Context;
 
-use bh_agent_common::AgentError::*;
 use bh_agent_common::{
     AgentError, BhAgentService, EnvironmentId, FileId, FileOpenMode, FileOpenType, ProcessChannel,
     ProcessId, RemotePOpenConfig,
 };
+use bh_agent_common::{AgentError::*, UserId};
 
 use crate::state::BhAgentState;
-use crate::util::{read_generic, read_lines};
+use crate::util::{chmod, chown, read_generic, read_lines};
 
 macro_rules! check_env_id {
     ($env_id:expr) => {
@@ -281,5 +281,26 @@ impl BhAgentService for BhAgentServer {
                 .do_mut_operation(&fd, |file| file.write(&data))
                 .map(|_| ()),
         )
+    }
+
+    type ChownFut = Ready<Result<(), AgentError>>;
+    fn chown(
+        self,
+        _: Context,
+        env_id: EnvironmentId,
+        path: String,
+        user: Option<UserId>,
+        group: Option<UserId>,
+    ) -> Self::ChownFut {
+        check_env_id!(env_id);
+
+        ready(chown(path, user, group))
+    }
+
+    type ChmodFut = Ready<Result<(), AgentError>>;
+    fn chmod(self, _: Context, env_id: EnvironmentId, path: String, mode: u32) -> Self::ChmodFut {
+        check_env_id!(env_id);
+
+        ready(chmod(path, mode))
     }
 }

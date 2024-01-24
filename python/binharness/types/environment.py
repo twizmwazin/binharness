@@ -67,3 +67,13 @@ class Environment(ABC):
     def open_file(self: Environment, path: Path, mode: str) -> IO[AnyStr]:
         """Open a file in the environment. Follows the same semantics as `open`."""
         raise NotImplementedError
+
+    @abstractmethod
+    def chown(self: Environment, path: Path, user: str, group: str) -> None:
+        """Change the owner of a file."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def chmod(self: Environment, path: Path, mode: int) -> None:
+        """Change the mode of a file."""
+        raise NotImplementedError

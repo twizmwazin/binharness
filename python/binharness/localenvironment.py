@@ -71,6 +71,14 @@ class LocalEnvironment(Environment):
         """Open a file in the environment. Follows the same semantics as `open`."""
         return Path.open(path, mode)
 
+    def chown(self: Environment, path: Path, user: str, group: str) -> None:
+        """Change the owner of a file."""
+        shutil.chown(path, user, group)
+
+    def chmod(self: Environment, path: Path, mode: int) -> None:
+        """Change the mode of a file."""
+        path.chmod(mode)
+
 
 class LocalProcess(Process):
     """A process running in a local environment."""

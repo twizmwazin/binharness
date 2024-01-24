@@ -46,3 +46,9 @@ pub enum FileOpenType {
     Binary,
     Text,
 }
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub enum UserId {
+    Id(u32),
+    Name(String),
+}

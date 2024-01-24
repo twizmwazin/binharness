@@ -2,7 +2,7 @@ use crate::client::build_client;
 use anyhow::Result;
 use bh_agent_common::{
     AgentError, BhAgentServiceClient, EnvironmentId, FileId, FileOpenMode, FileOpenType,
-    ProcessChannel, ProcessId, Redirection, RemotePOpenConfig,
+    ProcessChannel, ProcessId, Redirection, RemotePOpenConfig, UserId,
 };
 use log::debug;
 use pyo3::exceptions::PyRuntimeError;
@@ -370,6 +370,46 @@ impl BhAgentClient {
         run_in_runtime(
             self,
             self.client.file_write(context::current(), env_id, fd, data),
+        )
+    }
+
+    fn chown(
+        &self,
+        env_id: EnvironmentId,
+        path: String,
+        user: Option<String>,
+        group: Option<String>,
+    ) -> PyResult<()> {
+        debug!(
+            "Chowning file for environment {}, path {}, user {:?}, group {:?}",
+            env_id, path, user, group
+        );
+
+        let parsed_user = user.map(|u| match u.parse::<u32>() {
+            Ok(id) => UserId::Id(id),
+            Err(_) => UserId::Name(u),
+        });
+        let parsed_group = group.map(|g| match g.parse::<u32>() {
+            Ok(id) => UserId::Id(id),
+            Err(_) => UserId::Name(g),
+        });
+
+        run_in_runtime(
+            self,
+            self.client
+                .chown(context::current(), env_id, path, parsed_user, parsed_group),
+        )
+    }
+
+    fn chmod(&self, env_id: EnvironmentId, path: String, mode: u32) -> PyResult<()> {
+        debug!(
+            "Chmoding file for environment {}, path {}, mode {}",
+            env_id, path, mode
+        );
+
+        run_in_runtime(
+            self,
+            self.client.chmod(context::current(), env_id, path, mode),
         )
     }
 }
