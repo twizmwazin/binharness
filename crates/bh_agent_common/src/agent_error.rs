@@ -1,5 +1,4 @@
 use crate::AgentError::LockError;
-use nix::errno::Errno;
 use serde::{Deserialize, Serialize};
 use std::sync::{PoisonError, RwLockReadGuard, RwLockWriteGuard};
 use thiserror::Error;
@@ -28,6 +27,8 @@ pub enum AgentError {
     GroupNotFound(String),
     #[error("Unix Error: {0}")]
     Errno(i32),
+    #[error("Unsupported platform")]
+    UnsupportedPlatform,
     #[error("The server state is inconsistent")]
     Inconsistent,
     #[error("Unknown Error")]
@@ -52,8 +53,9 @@ impl<T> From<RwLockWriteGuard<'_, T>> for AgentError {
     }
 }
 
-impl From<Errno> for AgentError {
-    fn from(errno: Errno) -> Self {
+#[cfg(target_family = "unix")]
+impl From<nix::errno::Errno> for AgentError {
+    fn from(errno: nix::errno::Errno) -> Self {
         AgentError::Errno(errno as i32)
     }
 }
