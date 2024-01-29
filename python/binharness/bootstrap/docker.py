@@ -1,4 +1,5 @@
 """binharness.bootstrap.docker - Docker bootstrap for binharness."""
+
 from __future__ import annotations
 
 import io

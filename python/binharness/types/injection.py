@@ -1,4 +1,5 @@
 """binharness.types.inject - Inject files into an environment."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

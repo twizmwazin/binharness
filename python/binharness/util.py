@@ -1,4 +1,5 @@
 """binharness.util - Utility functions for binharness."""
+
 from __future__ import annotations
 
 import random

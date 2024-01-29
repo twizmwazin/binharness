@@ -1,4 +1,5 @@
 """binharness.types.process - A process running in an environment."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod, abstractproperty
