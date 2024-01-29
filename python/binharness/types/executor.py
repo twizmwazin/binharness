@@ -1,4 +1,5 @@
 """binharness.types.executor - A way to run a target in an environment."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

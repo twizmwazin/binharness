@@ -1,4 +1,5 @@
 """binharness.types - Type definitions for Binharness."""
+
 from __future__ import annotations
 
 from binharness.types.environment import Environment

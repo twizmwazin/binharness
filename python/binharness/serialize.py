@@ -1,4 +1,5 @@
 """binharness.serialize - Serialize and deserialize targets."""
+
 from __future__ import annotations
 
 import json

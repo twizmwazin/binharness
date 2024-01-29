@@ -1,4 +1,5 @@
 """binharness.types.io - Type definition for file-like objects."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, AnyStr, ContextManager, Protocol

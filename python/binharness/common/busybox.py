@@ -1,4 +1,5 @@
 """binharness.common.busybox - A busybox injection."""
+
 from __future__ import annotations
 
 from os import environ
