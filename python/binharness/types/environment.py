@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from binharness import IO, Process
+    from binharness.types.stat import FileStat
 
 
 class Environment(ABC):
@@ -76,4 +77,9 @@ class Environment(ABC):
     @abstractmethod
     def chmod(self: Environment, path: Path, mode: int) -> None:
         """Change the mode of a file."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def stat(self: Environment, path: Path) -> FileStat:
+        """Get the stat of a file."""
         raise NotImplementedError

@@ -1,3 +1,12 @@
+class FileStat:
+    mode: int
+    uid: int
+    gid: int
+    size: int
+    atime: int
+    mtime: int
+    ctime: int
+
 class BhAgentClient:
     @staticmethod
     def initialize_client(ip_addr: str, port: int) -> BhAgentClient: ...
@@ -34,3 +43,4 @@ class BhAgentClient:
     def file_write(self, env_id: int, fd: int, data: bytes) -> int: ...
     def chown(self, env_id: int, path: str, user: str, group: str) -> None: ...
     def chmod(self, env_id: int, path: str, mode: int) -> None: ...
+    def stat(self, env_id: int, path: str) -> FileStat: ...

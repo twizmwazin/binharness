@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, AnyStr, Sequence
 
 from binharness.types.environment import Environment
 from binharness.types.process import Process
+from binharness.types.stat import FileStat
 from binharness.util import normalize_args
 
 if TYPE_CHECKING:
@@ -78,6 +79,10 @@ class LocalEnvironment(Environment):
     def chmod(self: Environment, path: Path, mode: int) -> None:
         """Change the mode of a file."""
         path.chmod(mode)
+
+    def stat(self: Environment, path: Path) -> FileStat:
+        """Get the stat of a file."""
+        return FileStat.from_os(path.stat())
 
 
 class LocalProcess(Process):

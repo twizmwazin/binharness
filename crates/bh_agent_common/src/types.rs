@@ -1,3 +1,5 @@
+#[cfg(feature = "python")]
+use pyo3::pyclass;
 use serde::{Deserialize, Serialize};
 
 pub type EnvironmentId = u64;
@@ -51,4 +53,31 @@ pub enum FileOpenType {
 pub enum UserId {
     Id(u32),
     Name(String),
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[cfg_attr(feature = "python", pyclass)]
+pub struct FileStat {
+    pub mode: u16,
+    pub uid: u32,
+    pub gid: u32,
+    pub size: i64,
+    pub atime: i64,
+    pub mtime: i64,
+    pub ctime: i64,
+}
+
+#[cfg(target_family = "unix")]
+impl From<nix::sys::stat::FileStat> for FileStat {
+    fn from(stat: nix::sys::stat::FileStat) -> Self {
+        Self {
+            mode: stat.st_mode as u16,
+            uid: stat.st_uid,
+            gid: stat.st_gid,
+            size: stat.st_size,
+            atime: stat.st_atime as i64,
+            mtime: stat.st_mtime as i64,
+            ctime: stat.st_ctime as i64,
+        }
+    }
 }

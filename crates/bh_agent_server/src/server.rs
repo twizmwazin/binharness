@@ -14,7 +14,7 @@ use bh_agent_common::{AgentError::*, UserId};
 
 use crate::state::BhAgentState;
 #[cfg(target_family = "unix")]
-use crate::util::{chmod, chown};
+use crate::util::{chmod, chown, stat};
 use crate::util::{read_generic, read_lines};
 
 macro_rules! check_env_id {
@@ -309,6 +309,17 @@ impl BhAgentService for BhAgentServer {
 
         #[cfg(target_family = "unix")]
         return ready(chmod(path, mode));
+
+        #[cfg(not(target_family = "unix"))]
+        return ready(Err(AgentError::UnsupportedPlatform));
+    }
+
+    type StatFut = Ready<Result<bh_agent_common::FileStat, AgentError>>;
+    fn stat(self, _: Context, env_id: EnvironmentId, path: String) -> Self::StatFut {
+        check_env_id!(env_id);
+
+        #[cfg(target_family = "unix")]
+        return ready(stat(path));
 
         #[cfg(not(target_family = "unix"))]
         return ready(Err(AgentError::UnsupportedPlatform));

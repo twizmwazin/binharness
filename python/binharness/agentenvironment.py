@@ -11,6 +11,7 @@ from bh_agent_client import BhAgentClient
 from binharness.types.environment import Environment
 from binharness.types.io import IO
 from binharness.types.process import Process
+from binharness.types.stat import FileStat
 from binharness.util import normalize_args
 
 
@@ -231,6 +232,10 @@ class AgentEnvironment(Environment):
     def chmod(self: AgentEnvironment, path: Path, mode: int) -> None:
         """Change the mode of a file."""
         self._client.chmod(self._id, str(path), mode)
+
+    def stat(self: AgentEnvironment, path: Path) -> FileStat:
+        """Get the stat of a file."""
+        return FileStat.from_agent(self._client.stat(self._id, str(path)))
 
 
 class AgentConnection:

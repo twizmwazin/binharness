@@ -1,6 +1,6 @@
 use crate::agent_error::AgentError;
 use crate::{
-    EnvironmentId, FileId, FileOpenMode, FileOpenType, ProcessChannel, ProcessId,
+    EnvironmentId, FileId, FileOpenMode, FileOpenType, FileStat, ProcessChannel, ProcessId,
     RemotePOpenConfig, UserId,
 };
 use anyhow::Result;
@@ -95,4 +95,6 @@ pub trait BhAgentService {
     ) -> Result<(), AgentError>;
 
     async fn chmod(env_id: EnvironmentId, path: String, mode: u32) -> Result<(), AgentError>;
+
+    async fn stat(env_id: EnvironmentId, path: String) -> Result<FileStat, AgentError>;
 }

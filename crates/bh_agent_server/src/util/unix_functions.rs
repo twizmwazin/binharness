@@ -1,5 +1,6 @@
 use anyhow::Result;
-use bh_agent_common::{AgentError, UserId};
+use bh_agent_common::{AgentError, FileStat, UserId};
+use nix::sys::stat::stat as nix_stat;
 use nix::unistd::{chown as nix_chown, Gid, Group, Uid, User};
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
@@ -36,4 +37,10 @@ pub fn chown(path: String, user: Option<UserId>, group: Option<UserId>) -> Resul
 pub fn chmod(path: String, mode: u32) -> Result<(), AgentError> {
     std::fs::set_permissions(Path::new(&path), PermissionsExt::from_mode(mode))?;
     Ok(())
+}
+
+pub fn stat(path: String) -> Result<FileStat, AgentError> {
+    nix_stat(Path::new(&path))
+        .map(|s| s.into())
+        .map_err(|e| e.into())
 }

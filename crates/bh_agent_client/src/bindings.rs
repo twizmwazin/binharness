@@ -1,7 +1,7 @@
 use crate::client::build_client;
 use anyhow::Result;
 use bh_agent_common::{
-    AgentError, BhAgentServiceClient, EnvironmentId, FileId, FileOpenMode, FileOpenType,
+    AgentError, BhAgentServiceClient, EnvironmentId, FileId, FileOpenMode, FileOpenType, FileStat,
     ProcessChannel, ProcessId, Redirection, RemotePOpenConfig, UserId,
 };
 use log::debug;
@@ -412,11 +412,18 @@ impl BhAgentClient {
             self.client.chmod(context::current(), env_id, path, mode),
         )
     }
+
+    fn stat(&self, env_id: EnvironmentId, path: String) -> PyResult<FileStat> {
+        debug!("Stating file for environment {}, path {}", env_id, path);
+
+        run_in_runtime(self, self.client.stat(context::current(), env_id, path))
+    }
 }
 
 #[pymodule]
 pub fn bh_agent_client(_py: Python, m: &PyModule) -> PyResult<()> {
     pyo3_log::init();
+    m.add_class::<FileStat>()?;
     m.add_class::<BhAgentClient>()?;
     Ok(())
 }
