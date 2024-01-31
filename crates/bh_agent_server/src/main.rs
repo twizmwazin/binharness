@@ -1,4 +1,4 @@
-use std::{net::IpAddr, process::exit};
+use std::net::IpAddr;
 
 use argh::FromArgs;
 use futures::{future, prelude::*};
@@ -22,7 +22,7 @@ struct Args {
     port: u16,
     #[cfg(not(target_os = "windows"))]
     /// daemonize the process
-    #[argh(option, default = "false")]
+    #[argh(switch, short = 'd')]
     daemonize: bool,
 }
 
