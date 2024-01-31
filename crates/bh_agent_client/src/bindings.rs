@@ -7,6 +7,7 @@ use bh_agent_common::{
 use log::debug;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
+use pyo3::types::PyBytes;
 use pyo3::{pyclass, pymethods, pymodule, PyResult, Python};
 use std::future::Future;
 use std::net::{IpAddr, SocketAddr};
@@ -276,10 +277,11 @@ impl BhAgentClient {
 
     fn file_read(
         &self,
+        py: Python,
         env_id: EnvironmentId,
         fd: FileId,
         num_bytes: Option<u32>,
-    ) -> PyResult<Vec<u8>> {
+    ) -> PyResult<Py<PyBytes>> {
         debug!(
             "Reading file for environment {}, fd {}, num_bytes {:?}",
             env_id, fd, num_bytes
@@ -290,14 +292,16 @@ impl BhAgentClient {
             self.client
                 .file_read(context::current(), env_id, fd, num_bytes),
         )
+        .map(|bytes| PyBytes::new(py, bytes.as_slice()).into())
     }
 
     fn file_read_lines(
         &self,
+        py: Python,
         env_id: EnvironmentId,
         fd: FileId,
         hint: u32,
-    ) -> PyResult<Vec<Vec<u8>>> {
+    ) -> PyResult<Vec<Py<PyBytes>>> {
         debug!(
             "Reading file lines for environment {}, fd {}, hint {}",
             env_id, fd, hint
@@ -308,6 +312,12 @@ impl BhAgentClient {
             self.client
                 .file_read_lines(context::current(), env_id, fd, hint),
         )
+        .map(|lines| {
+            lines
+                .into_iter()
+                .map(|bytes| PyBytes::new(py, bytes.as_slice()).into())
+                .collect()
+        })
     }
 
     fn file_is_seekable(&self, env_id: EnvironmentId, fd: FileId) -> PyResult<bool> {

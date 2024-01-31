@@ -46,10 +46,8 @@ class AgentIO(IO[bytes]):
 
     def read(self: AgentIO, n: int = -1) -> bytes:
         """Read n bytes from the file."""
-        return bytes(
-            self._client.file_read(
-                self._environment_id, self._fd, None if n == -1 else n
-            )
+        return self._client.file_read(
+            self._environment_id, self._fd, None if n == -1 else n
         )
 
     def readable(self: AgentIO) -> bool:
