@@ -1,5 +1,8 @@
 """binharness.bootstrap.ssh - SSH bootstrap module for binharness."""
+
 from __future__ import annotations
+
+import time
 
 import paramiko
 
@@ -51,9 +54,10 @@ def bootstrap_ssh_environment_with_client(  # noqa: PLR0913
     ssh_client.exec_command(f"chmod +x {install_path}")
 
     # Start the agent
-    _, stdout, _ = ssh_client.exec_command(
-        f"{install_path} -d {listen_ip} {listen_port}"
-    )
+    ssh_client.exec_command(f"{install_path} -d {listen_ip} {listen_port}")
+
+    # Wait for the agent to start
+    time.sleep(1)
 
     # Create the agent connection
     return SSHAgent(ssh_client, connect_ip, connect_port)
