@@ -6,22 +6,24 @@ from pathlib import Path
 
 import pytest
 
-from binharness.localenvironment import LocalEnvironment
-from binharness.serialize import TargetImportError, export_target, import_target
-from binharness.types.executor import NullExecutor
-from binharness.types.target import Target
+from binharness import (
+    Environment,
+    NullExecutor,
+    Target,
+    TargetImportError,
+    export_target,
+    import_target,
+)
 
 
-def test_local_target_export() -> None:
-    env = LocalEnvironment()
+def test_local_target_export(env: Environment) -> None:
     target = Target(env, Path("/usr/bin/true"))
     with tempfile.TemporaryDirectory() as raw_tmpdir:
         tmpdir = Path(raw_tmpdir)
         export_target(target, tmpdir / "test_export.zip")
 
 
-def test_local_target_import() -> None:
-    env = LocalEnvironment()
+def test_local_target_import(env: Environment) -> None:
     target = Target(env, Path("/usr/bin/true"))
     with tempfile.TemporaryDirectory() as raw_tmpdir:
         tmpdir = Path(raw_tmpdir)
@@ -35,8 +37,7 @@ def test_local_target_import() -> None:
     assert executor.run_target(new_target).wait() == 0
 
 
-def test_local_target_import_without_metadata() -> None:
-    env = LocalEnvironment()
+def test_local_target_import_without_metadata(env: Environment) -> None:
     target = Target(env, Path("/usr/bin/true"))
     with tempfile.TemporaryDirectory() as raw_tmpdir:
         tmpdir = Path(raw_tmpdir)
@@ -54,8 +55,7 @@ def test_local_target_import_without_metadata() -> None:
             import_target(env, tmpdir / "test_export_modified.zip")
 
 
-def test_local_target_import_invalid_metadata_archive() -> None:
-    env = LocalEnvironment()
+def test_local_target_import_invalid_metadata_archive(env: Environment) -> None:
     target = Target(env, Path("/usr/bin/true"))
     with tempfile.TemporaryDirectory() as raw_tmpdir:
         tmpdir = Path(raw_tmpdir)

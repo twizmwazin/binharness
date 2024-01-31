@@ -4,24 +4,25 @@ from pathlib import Path
 
 import pytest
 
-from binharness.common.busybox import BusyboxShellExecutor
-from binharness.localenvironment import LocalEnvironment
-from binharness.types.executor import (
+from binharness import (
+    Environment,
     ExecutorEnvironmentMismatchError,
+    InjectionNotInstalledError,
+    LocalEnvironment,
+    Target,
 )
-from binharness.types.injection import InjectionNotInstalledError
-from binharness.types.target import Target
+from binharness.common.busybox import BusyboxShellExecutor
 
 
 @pytest.mark.linux()
-def test_busybox_injection_without_install() -> None:
-    env = LocalEnvironment()
+def test_busybox_injection_without_install(env: Environment) -> None:
     target = Target(env, Path("/usr/bin/true"))
     busybox_shell = BusyboxShellExecutor()
     with pytest.raises(InjectionNotInstalledError):
         assert busybox_shell.run_target(target)
 
 
+# TODO: Maybe LocalEnvironment objects should be interchangable?
 @pytest.mark.linux()
 def test_busybox_injection_different_environment() -> None:
     env1 = LocalEnvironment()

@@ -2,23 +2,24 @@ from __future__ import annotations
 
 import pathlib
 import tempfile
+from typing import TYPE_CHECKING
 
 import pytest
 
 from binharness.common.busybox import BusyboxInjection
-from binharness.localenvironment import LocalEnvironment
+
+if TYPE_CHECKING:
+    from binharness import Environment
 
 
-def test_run_command() -> None:
-    env = LocalEnvironment()
+def test_run_command(env: Environment) -> None:
     proc = env.run_command(["echo", "hello"])
     stdout, _ = proc.communicate()
     assert proc.returncode == 0
     assert stdout == b"hello\n"
 
 
-def test_inject_files() -> None:
-    env = LocalEnvironment()
+def test_inject_files(env: Environment) -> None:
     env_temp = env.get_tempdir()
     with tempfile.TemporaryDirectory() as tmp_dir:
         tmp_path = pathlib.Path(tmp_dir)
@@ -32,14 +33,14 @@ def test_inject_files() -> None:
         assert local_file.read_text() == "hello"
 
 
-def test_get_tempdir() -> None:
-    env = LocalEnvironment()
-    assert env.get_tempdir() == pathlib.Path(tempfile.gettempdir())
+# TODO: Need to think about how to handle this test with remote environments
+def test_get_tempdir(local_env: Environment) -> None:
+    assert local_env.get_tempdir() == pathlib.Path(tempfile.gettempdir())
 
 
+# TODO: Need to think about how to test these with non-linux environments
 @pytest.mark.linux()
-def test_stdout() -> None:
-    env = LocalEnvironment()
+def test_stdout(env: Environment) -> None:
     busybox = BusyboxInjection()
     busybox.install(env)
     proc = busybox.shell("echo hello")
@@ -48,8 +49,7 @@ def test_stdout() -> None:
 
 
 @pytest.mark.linux()
-def test_stderr() -> None:
-    env = LocalEnvironment()
+def test_stderr(env: Environment) -> None:
     busybox = BusyboxInjection()
     busybox.install(env)
     proc = busybox.shell("echo hello 1>&2")
@@ -58,8 +58,7 @@ def test_stderr() -> None:
 
 
 @pytest.mark.linux()
-def test_process_poll() -> None:
-    env = LocalEnvironment()
+def test_process_poll(env: Environment) -> None:
     busybox = BusyboxInjection()
     busybox.install(env)
     proc = busybox.run("head")

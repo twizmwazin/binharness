@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import stat
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
-from binharness.localenvironment import LocalEnvironment
 from binharness.types.injection import (
     ExecutableInjection,
     Injection,
@@ -13,10 +13,12 @@ from binharness.types.injection import (
     InjectionNotInstalledError,
 )
 
+if TYPE_CHECKING:
+    from binharness.types.environment import Environment
+
 
 @pytest.mark.linux()
-def test_inject_true() -> None:
-    env = LocalEnvironment()
+def test_inject_true(env: Environment) -> None:
     true_injection = Injection(Path("/usr/bin/true"))
     true_injection.install(env)
     assert true_injection.env_path is not None
@@ -24,8 +26,7 @@ def test_inject_true() -> None:
 
 
 @pytest.mark.linux()
-def test_inject_true_executable() -> None:
-    env = LocalEnvironment()
+def test_inject_true_executable(env: Environment) -> None:
     true_injection = ExecutableInjection(Path("/usr/bin/true"))
     true_injection.install(env)
     assert true_injection.env_path is not None
@@ -36,8 +37,7 @@ def test_inject_true_executable() -> None:
 
 
 @pytest.mark.linux()
-def test_inject_true_executable_twice() -> None:
-    env = LocalEnvironment()
+def test_inject_true_executable_twice(env: Environment) -> None:
     true_injection = ExecutableInjection(Path("/usr/bin/true"))
     true_injection.install(env)
     with pytest.raises(InjectionAlreadyInstalledError):
@@ -45,8 +45,7 @@ def test_inject_true_executable_twice() -> None:
 
 
 @pytest.mark.linux()
-def test_inject_two_true_executables() -> None:
-    env = LocalEnvironment()
+def test_inject_two_true_executables(env: Environment) -> None:
     true_injection_1 = ExecutableInjection(Path("/usr/bin/true"))
     true_injection_1.install(env)
     true_injection_2 = ExecutableInjection(Path("/usr/bin/true"))
