@@ -29,4 +29,4 @@ def test_bootstrap_env_from_image(
         assert proc.returncode == 0
         assert proc.stdout.read() == b"hello world\n"
     finally:
-        agent.container.stop()
+        agent.container.kill()

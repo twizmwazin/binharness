@@ -1,4 +1,4 @@
-use std::{net::IpAddr, process::exit};
+use std::net::IpAddr;
 
 use argh::FromArgs;
 use futures::{future, prelude::*};
@@ -22,13 +22,22 @@ struct Args {
     port: u16,
     #[cfg(not(target_os = "windows"))]
     /// daemonize the process
-    #[argh(option, default = "false")]
+    #[argh(switch, short = 'd')]
     daemonize: bool,
 }
 
 fn main() -> anyhow::Result<()> {
     env_logger::init();
     let args = argh::from_env::<Args>();
+
+    // Daemonize
+    #[cfg(not(target_os = "windows"))]
+    if args.daemonize {
+        daemonize::Daemonize::new()
+            .pid_file("/tmp/bh_agent_server.pid")
+            .start()
+            .unwrap();
+    }
 
     // Setup runtime
     let rt = runtime::Builder::new_multi_thread()
@@ -42,15 +51,6 @@ fn main() -> anyhow::Result<()> {
             .await;
     })?;
     listener.config_mut().max_frame_length(usize::MAX);
-
-    // Daemonize
-    #[cfg(not(target_os = "windows"))]
-    if args.daemonize {
-        daemonize::Daemonize::new()
-            .pid_file("/tmp/bh_agent_server.pid")
-            .start()
-            .unwrap();
-    }
 
     // Run the listener
     rt.block_on(async {

@@ -11,7 +11,7 @@ analyze those targets in.
 - [x] Run targets in a remote environment using Binharness agent
 - [x] Allow clients to detach from the agent and reconnect later (ie. for
       long-running analyses and road-warrior scenarios)
-- [ ] Automatically bootstrap a remote environment over SSH
+- [x] Automatically bootstrap a remote environment over SSH
 - [x] Automatically bootstrap a remote environment in Docker
 - [ ] Automatically bootstrap a remote environment in Kubernetes
 
