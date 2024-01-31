@@ -6,13 +6,15 @@ use std::sync::Arc;
 use anyhow::Result;
 use tarpc::context::Context;
 
-use bh_agent_common::AgentError::*;
 use bh_agent_common::{
     AgentError, BhAgentService, EnvironmentId, FileId, FileOpenMode, FileOpenType, ProcessChannel,
     ProcessId, RemotePOpenConfig,
 };
+use bh_agent_common::{AgentError::*, UserId};
 
 use crate::state::BhAgentState;
+#[cfg(target_family = "unix")]
+use crate::util::{chmod, chown, stat};
 use crate::util::{read_generic, read_lines};
 
 macro_rules! check_env_id {
@@ -281,5 +283,45 @@ impl BhAgentService for BhAgentServer {
                 .do_mut_operation(&fd, |file| file.write(&data))
                 .map(|_| ()),
         )
+    }
+
+    type ChownFut = Ready<Result<(), AgentError>>;
+    fn chown(
+        self,
+        _: Context,
+        env_id: EnvironmentId,
+        path: String,
+        user: Option<UserId>,
+        group: Option<UserId>,
+    ) -> Self::ChownFut {
+        check_env_id!(env_id);
+
+        #[cfg(target_family = "unix")]
+        return ready(chown(path, user, group));
+
+        #[cfg(not(target_family = "unix"))]
+        return ready(Err(AgentError::UnsupportedPlatform));
+    }
+
+    type ChmodFut = Ready<Result<(), AgentError>>;
+    fn chmod(self, _: Context, env_id: EnvironmentId, path: String, mode: u32) -> Self::ChmodFut {
+        check_env_id!(env_id);
+
+        #[cfg(target_family = "unix")]
+        return ready(chmod(path, mode));
+
+        #[cfg(not(target_family = "unix"))]
+        return ready(Err(AgentError::UnsupportedPlatform));
+    }
+
+    type StatFut = Ready<Result<bh_agent_common::FileStat, AgentError>>;
+    fn stat(self, _: Context, env_id: EnvironmentId, path: String) -> Self::StatFut {
+        check_env_id!(env_id);
+
+        #[cfg(target_family = "unix")]
+        return ready(stat(path));
+
+        #[cfg(not(target_family = "unix"))]
+        return ready(Err(AgentError::UnsupportedPlatform));
     }
 }

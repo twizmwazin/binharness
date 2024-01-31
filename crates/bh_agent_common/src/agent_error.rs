@@ -21,6 +21,14 @@ pub enum AgentError {
     InvalidProcessId,
     #[error("Process channel not piped")]
     ProcessChannelNotPiped,
+    #[error("User {0} not found")]
+    UserNotFound(String),
+    #[error("Group {0} not found")]
+    GroupNotFound(String),
+    #[error("Unix Error: {0}")]
+    Errno(i32),
+    #[error("Unsupported platform")]
+    UnsupportedPlatform,
     #[error("The server state is inconsistent")]
     Inconsistent,
     #[error("Unknown Error")]
@@ -42,5 +50,18 @@ impl<T> From<RwLockReadGuard<'_, T>> for AgentError {
 impl<T> From<RwLockWriteGuard<'_, T>> for AgentError {
     fn from(_: RwLockWriteGuard<T>) -> Self {
         LockError
+    }
+}
+
+#[cfg(target_family = "unix")]
+impl From<nix::errno::Errno> for AgentError {
+    fn from(errno: nix::errno::Errno) -> Self {
+        AgentError::Errno(errno as i32)
+    }
+}
+
+impl From<std::io::Error> for AgentError {
+    fn from(error: std::io::Error) -> Self {
+        AgentError::IoError(error.to_string())
     }
 }

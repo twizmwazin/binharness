@@ -11,6 +11,7 @@ from bh_agent_client import BhAgentClient
 from binharness.types.environment import Environment
 from binharness.types.io import IO
 from binharness.types.process import Process
+from binharness.types.stat import FileStat
 from binharness.util import normalize_args
 
 
@@ -202,11 +203,7 @@ class AgentEnvironment(Environment):
                     self._client.file_write(self._id, fd, chunk)
             self._client.file_close(self._id, fd)
             local_attrs = src.stat()
-            self.run_command(
-                "chmod",  # TODO: Native chmod function
-                str(oct(local_attrs.st_mode))[-3:],
-                str(dst),
-            ).wait()
+            self.chmod(dst, local_attrs.st_mode)
 
     def retrieve_files(self: AgentEnvironment, files: list[tuple[Path, Path]]) -> None:
         """Retrieve files from the environment."""
@@ -225,6 +222,18 @@ class AgentEnvironment(Environment):
         # TODO: Need to better handle mode/typing here
         fd = self._client.file_open(self._id, str(path), mode)
         return AgentIO(self._client, self._id, fd)
+
+    def chown(self: AgentEnvironment, path: Path, user: str, group: str) -> None:
+        """Change the owner of a file."""
+        self._client.chown(self._id, str(path), user, group)
+
+    def chmod(self: AgentEnvironment, path: Path, mode: int) -> None:
+        """Change the mode of a file."""
+        self._client.chmod(self._id, str(path), mode)
+
+    def stat(self: AgentEnvironment, path: Path) -> FileStat:
+        """Get the stat of a file."""
+        return FileStat.from_agent(self._client.stat(self._id, str(path)))
 
 
 class AgentConnection:

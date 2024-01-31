@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, AnyStr, Sequence
 
 from binharness.types.environment import Environment
 from binharness.types.process import Process
+from binharness.types.stat import FileStat
 from binharness.util import normalize_args
 
 if TYPE_CHECKING:
@@ -70,6 +71,18 @@ class LocalEnvironment(Environment):
     def open_file(self: Environment, path: Path, mode: str) -> IO[AnyStr]:
         """Open a file in the environment. Follows the same semantics as `open`."""
         return Path.open(path, mode)
+
+    def chown(self: Environment, path: Path, user: str, group: str) -> None:
+        """Change the owner of a file."""
+        shutil.chown(path, user, group)
+
+    def chmod(self: Environment, path: Path, mode: int) -> None:
+        """Change the mode of a file."""
+        path.chmod(mode)
+
+    def stat(self: Environment, path: Path) -> FileStat:
+        """Get the stat of a file."""
+        return FileStat.from_os(path.stat())
 
 
 class LocalProcess(Process):
