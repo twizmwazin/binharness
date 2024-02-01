@@ -3,94 +3,36 @@ use std::io::Read;
 
 use anyhow::Result;
 use log::trace;
+use unicode_reader::Graphemes;
 
 use bh_agent_common::FileOpenType;
 
-pub fn read_generic(mut file: &File, n: Option<u32>, file_type: FileOpenType) -> Result<Vec<u8>> {
+pub fn read_generic(file: &mut File, n: Option<u32>, file_type: FileOpenType) -> Result<Vec<u8>> {
     trace!("Entering read_generic");
     if let Some(num_bytes) = n {
         match file_type {
-            FileOpenType::Binary => {
-                let mut buffer = vec![0u8; num_bytes as usize];
-                file.read(&mut buffer)?;
-                Ok(buffer)
-            }
-            FileOpenType::Text => Ok(read_chars(&mut file, num_bytes as usize)?),
+            FileOpenType::Binary => Ok(read_bytes(file, num_bytes as usize)?),
+            FileOpenType::Text => Ok(read_graphemes(file, num_bytes as usize)?),
         }
     } else {
         // if n is None, we just read the whole file, text parsing happens on the client
-        let mut buffer = Vec::new();
-        file.read_to_end(&mut buffer)?;
-        Ok(buffer)
+        Ok(file.bytes().collect::<Result<Vec<u8>, std::io::Error>>()?)
     }
 }
 
-pub fn read_chars<R: Read>(reader: &mut R, n: usize) -> Result<Vec<u8>> {
-    let mut buffer = vec![0u8; n];
-    let mut result = String::new();
-
-    let bytes_read = reader.read(&mut buffer)?;
-    buffer.truncate(bytes_read); // Truncate buffer to actual bytes read
-
-    while result.chars().count() < n && !buffer.is_empty() {
-        let utf8_str = std::str::from_utf8(&buffer);
-
-        match utf8_str {
-            Ok(s) => {
-                result.push_str(s);
-                break;
-            }
-            Err(err) if err.valid_up_to() > 0 => {
-                let valid_str = std::str::from_utf8(&buffer[0..err.valid_up_to()]).unwrap();
-                result.push_str(valid_str);
-                buffer.drain(0..err.valid_up_to());
-            }
-            _ => {}
-        }
-
-        if result.chars().count() < n {
-            let mut additional_buffer = vec![0u8; n - result.chars().count()];
-            let additional_bytes = reader.read(&mut additional_buffer)?;
-            if additional_bytes == 0 {
-                break;
-            }
-            buffer.extend_from_slice(&additional_buffer[0..additional_bytes]);
-        }
-    }
-
-    Ok(result.into_bytes())
+fn read_bytes(file: &mut File, n: usize) -> Result<Vec<u8>> {
+    Ok(file
+        .bytes()
+        .take(n)
+        .collect::<Result<Vec<u8>, std::io::Error>>()?)
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::io;
-    use std::io::Cursor;
-
-    #[test]
-    fn test_single_byte_chars() -> io::Result<()> {
-        let data = "abcdef";
-        let mut cursor = Cursor::new(data.as_bytes());
-        let result = read_chars(&mut cursor, 3);
-        assert_eq!(result.unwrap(), b"abc");
-        Ok(())
-    }
-
-    #[test]
-    fn test_multi_byte_chars() -> io::Result<()> {
-        let data = "a😀b";
-        let mut cursor = Cursor::new(data.as_bytes());
-        let result = read_chars(&mut cursor, 2);
-        assert_eq!(result.unwrap(), "a😀".as_bytes());
-        Ok(())
-    }
-
-    #[test]
-    fn test_mixed_chars() -> io::Result<()> {
-        let data = "a😀b😂c";
-        let mut cursor = Cursor::new(data.as_bytes());
-        let result = read_chars(&mut cursor, 4);
-        assert_eq!(result.unwrap(), "a😀b😂".as_bytes());
-        Ok(())
-    }
+fn read_graphemes(file: &mut File, n: usize) -> Result<Vec<u8>> {
+    Ok(Graphemes::from(file)
+        .take(n)
+        .into_iter()
+        .collect::<Result<Vec<String>, std::io::Error>>()?
+        .join("")
+        .as_bytes()
+        .to_vec())
 }
