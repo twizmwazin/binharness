@@ -58,6 +58,9 @@ exclude_lines = [
 ]
 
 [tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
 select = ["ALL"]
 ignore = [
     "COM",
@@ -71,13 +74,12 @@ ignore = [
     "TD003",
 ]
 ignore-init-module-imports = true
-line-length = 88
 
 [tool.ruff.lint.isort]
 known-first-party = ["binharness"]
 required-imports = ["from __future__ import annotations"]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "python/tests/*" = [
     "D",
     "INP001",
