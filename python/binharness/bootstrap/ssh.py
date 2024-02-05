@@ -78,7 +78,7 @@ def bootstrap_ssh_environment(
     # Create the ssh client
     ssh_client = paramiko.SSHClient()
     ssh_client.load_system_host_keys()
-    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # noqa: S507
 
     # Connect to the remote box
     ssh_client.connect(ip, username=username)
