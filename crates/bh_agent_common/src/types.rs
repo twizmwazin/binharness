@@ -56,7 +56,7 @@ pub enum UserId {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-#[cfg_attr(feature = "python", pyclass)]
+#[cfg_attr(feature = "python", pyclass(get_all))]
 pub struct FileStat {
     pub mode: u16,
     pub uid: u32,
