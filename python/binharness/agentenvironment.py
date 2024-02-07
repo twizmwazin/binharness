@@ -115,22 +115,31 @@ class AgentProcess(Process):
         self._pid = pid
 
     @cached_property
-    def stdin(self: AgentProcess) -> AgentIO:
+    def stdin(self: AgentProcess) -> AgentIO | None:
         """Get the standard input stream of the process."""
-        fd = self._client.get_process_channel(self._env_id, self._pid, 0)
-        return AgentIO(self._client, self._env_id, fd)
+        try:
+            fd = self._client.get_process_channel(self._env_id, self._pid, 0)
+            return AgentIO(self._client, self._env_id, fd)
+        except RuntimeError:
+            return None  # TODO: verify that this is the right error
 
     @cached_property
-    def stdout(self: AgentProcess) -> AgentIO:
+    def stdout(self: AgentProcess) -> AgentIO | None:
         """Get the standard output stream of the process."""
-        fd = self._client.get_process_channel(self._env_id, self._pid, 1)
-        return AgentIO(self._client, self._env_id, fd)
+        try:
+            fd = self._client.get_process_channel(self._env_id, self._pid, 1)
+            return AgentIO(self._client, self._env_id, fd)
+        except RuntimeError:
+            return None  # TODO: verify that this is the right error
 
     @cached_property
-    def stderr(self: AgentProcess) -> AgentIO:
+    def stderr(self: AgentProcess) -> AgentIO | None:
         """Get the standard error stream of the process."""
-        fd = self._client.get_process_channel(self._env_id, self._pid, 2)
-        return AgentIO(self._client, self._env_id, fd)
+        try:
+            fd = self._client.get_process_channel(self._env_id, self._pid, 2)
+            return AgentIO(self._client, self._env_id, fd)
+        except RuntimeError:
+            return None  # TODO: verify that this is the right error
 
     @property
     def returncode(self: AgentProcess) -> int | None:
@@ -172,7 +181,7 @@ class AgentEnvironment(Environment):
             stdin=True,
             stdout=True,
             stderr=True,
-            executable=str(args[0]),
+            executable=str(normalized_args[0]),
             env=list(env.items()) if env else None,
             cwd=str(cwd) if cwd else None,
             setuid=None,

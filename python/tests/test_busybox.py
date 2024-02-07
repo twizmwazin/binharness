@@ -43,10 +43,14 @@ def test_nc_interaction() -> None:
     server_proc = busybox.nc("localhost", 10001, listen=True)
     client_proc = busybox.nc("localhost", 10001)
 
+    assert client_proc.stdin is not None
+    assert server_proc.stdin is not None
     client_proc.stdin.write(b"hello\n")
     client_proc.stdin.flush()
     server_proc.stdin.write(b"hello back\n")
     server_proc.stdin.flush()
 
+    assert server_proc.stdout is not None
     assert server_proc.stdout.readline() == b"hello\n"
+    assert client_proc.stdout is not None
     assert client_proc.stdout.readline() == b"hello back\n"

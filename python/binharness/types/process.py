@@ -34,17 +34,17 @@ class Process(ABC):
         self.cwd = cwd or environment.get_tempdir()
 
     @abstractproperty
-    def stdin(self: Process) -> IO[bytes]:
+    def stdin(self: Process) -> IO[bytes] | None:
         """Get the standard input stream of the process."""
         raise NotImplementedError
 
     @abstractproperty
-    def stdout(self: Process) -> IO[bytes]:
+    def stdout(self: Process) -> IO[bytes] | None:
         """Get the standard output stream of the process."""
         raise NotImplementedError
 
     @abstractproperty
-    def stderr(self: Process) -> IO[bytes]:
+    def stderr(self: Process) -> IO[bytes] | None:
         """Get the standard error stream of the process."""
         raise NotImplementedError
 
@@ -65,10 +65,13 @@ class Process(ABC):
 
     def communicate(
         self: Process, input_: bytes | None = None, timeout: float | None = None
-    ) -> tuple[bytes, bytes]:
+    ) -> tuple[bytes | None, bytes | None]:
         """Send input to the process and return its output and error streams."""
-        if input_ is not None:
-            self.stdin.write(input_)
-        self.stdin.close()
+        if self.stdin is not None:
+            if input_ is not None:
+                self.stdin.write(input_)
+            self.stdin.close()
         self.wait(timeout)
-        return (self.stdout.read(), self.stderr.read())
+        stdout = self.stdout.read() if self.stdout is not None else None
+        stderr = self.stderr.read() if self.stderr is not None else None
+        return (stdout, stderr)

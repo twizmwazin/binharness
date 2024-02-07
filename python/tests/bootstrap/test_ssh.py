@@ -47,6 +47,7 @@ def test_bootstrap_ssh_environment_with_client(
 
         proc.wait()
         assert proc.returncode == 0
+        assert proc.stdout is not None
         assert proc.stdout.read() == b"hello world\n"
     finally:
         agent.stop()
