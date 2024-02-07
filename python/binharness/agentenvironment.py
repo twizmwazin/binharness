@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from functools import cached_property
 from pathlib import Path
-from typing import Sequence
+from typing import Sequence, cast
 
 from bh_agent_client import BhAgentClient
 
@@ -143,7 +143,9 @@ class AgentProcess(Process):
 
     def wait(self: AgentProcess, timeout: float | None = None) -> int:
         """Wait for the process to terminate and return its exit code."""
-        return self._client.process_wait(self._env_id, self._pid, timeout)
+        if not self._client.process_wait(self._env_id, self._pid, timeout):
+            return cast(int, self.returncode)
+        raise TimeoutError
 
 
 class AgentEnvironment(Environment):
