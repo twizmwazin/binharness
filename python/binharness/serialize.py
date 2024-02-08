@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import json
-import tarfile
 import tempfile
+import zipfile
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -12,6 +12,9 @@ from binharness.types.target import Target
 
 if TYPE_CHECKING:
     from binharness.types.environment import Environment
+
+_ZIP_UNIX_SYSTEM = 3
+_META_FILENAME = ".bh-target-metadata"
 
 
 class TargetImportError(Exception):
@@ -23,10 +26,9 @@ def export_target(target: Target, export_path: Path) -> None:
 
     This function is the inverse of import_target.
     """
-    with tempfile.TemporaryDirectory() as raw_tmpdir, tarfile.open(
-        export_path,
-        "w:gz",
-    ) as tar:
+    with tempfile.TemporaryDirectory() as raw_tmpdir, zipfile.ZipFile(
+        export_path, "w"
+    ) as archive:
         tmpdir = Path(raw_tmpdir)
         target.environment.retrieve_files(
             [
@@ -40,9 +42,9 @@ def export_target(target: Target, export_path: Path) -> None:
             "args": target.args,
             "env": target.env,
         }
-        (tmpdir / ".envanalysis-metadata").write_text(json.dumps(metadata))
+        (tmpdir / _META_FILENAME).write_text(json.dumps(metadata))
         for file in tmpdir.iterdir():
-            tar.add(file, arcname=file.name)
+            archive.write(file, arcname=file.name)
 
 
 def import_target(environment: Environment, import_path: Path) -> Target:
@@ -50,24 +52,31 @@ def import_target(environment: Environment, import_path: Path) -> Target:
 
     This function is the inverse of export_target.
     """
-    with tempfile.TemporaryDirectory() as raw_tempdir, tarfile.open(
-        import_path,
-        "r",
-    ) as tar:
+    with tempfile.TemporaryDirectory() as raw_tempdir, zipfile.ZipFile(
+        import_path
+    ) as zip_file:
         tmpdir = Path(raw_tempdir)
         try:
-            metadata_io = tar.extractfile(".envanalysis-metadata")
+            metadata_io = zip_file.read(_META_FILENAME)
         except KeyError:
             raise TargetImportError from KeyError
         if metadata_io is None:
             raise TargetImportError
-        metadata = json.loads(metadata_io.read())
+        metadata = json.loads(metadata_io)
         main_binary = Path(metadata["main_binary"])
         extra_binaries = [Path(binary) for binary in metadata["extra_binaries"]]
         args = metadata["args"]
         env = metadata["env"]
-        for binary in [main_binary, *extra_binaries]:
-            tar.extract(binary.name, path=tmpdir)
+        to_extract = [str(p) for p in [main_binary, *extra_binaries]]
+        for info in zip_file.infolist():
+            if info.filename in to_extract:
+                extracted_path = zip_file.extract(info.filename, tmpdir)
+                # Restore permissions, https://stackoverflow.com/questions/42326428/
+                if info.create_system == _ZIP_UNIX_SYSTEM:
+                    unix_attributes = info.external_attr >> 16
+                    if unix_attributes:
+                        Path(extracted_path).chmod(unix_attributes)
+
         env_install_dir = environment.get_tempdir() / main_binary.name
         environment.inject_files(
             [

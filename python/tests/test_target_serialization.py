@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import tarfile
 import tempfile
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -17,7 +17,7 @@ def test_local_target_export() -> None:
     target = Target(env, Path("/usr/bin/true"))
     with tempfile.TemporaryDirectory() as raw_tmpdir:
         tmpdir = Path(raw_tmpdir)
-        export_target(target, tmpdir / "test_export.tar.gz")
+        export_target(target, tmpdir / "test_export.zip")
 
 
 def test_local_target_import() -> None:
@@ -25,8 +25,11 @@ def test_local_target_import() -> None:
     target = Target(env, Path("/usr/bin/true"))
     with tempfile.TemporaryDirectory() as raw_tmpdir:
         tmpdir = Path(raw_tmpdir)
-        export_target(target, tmpdir / "test_export.tar.gz")
-        new_target = import_target(env, tmpdir / "test_export.tar.gz")
+        assert tmpdir.exists()
+        assert tmpdir.is_dir()
+        export_path = tmpdir / "test_export.zip"
+        export_target(target, export_path)
+        new_target = import_target(env, export_path)
     assert new_target.main_binary.name == target.main_binary.name
     executor = NullExecutor()
     assert executor.run_target(new_target).wait() == 0
@@ -37,16 +40,18 @@ def test_local_target_import_without_metadata() -> None:
     target = Target(env, Path("/usr/bin/true"))
     with tempfile.TemporaryDirectory() as raw_tmpdir:
         tmpdir = Path(raw_tmpdir)
-        export_target(target, tmpdir / "test_export.tar.gz")
-        with tarfile.open(tmpdir / "test_export.tar.gz", "r") as old_tar, tarfile.open(
-            tmpdir / "test_export_modified.tar.gz",
-            "w:gz",
-        ) as new_tar:
-            for member in old_tar.getmembers():
-                if member.name != ".envanalysis-metadata":
-                    new_tar.addfile(member, old_tar.extractfile(member))
+        export_target(target, tmpdir / "test_export.zip")
+        with zipfile.ZipFile(
+            tmpdir / "test_export.zip", "r"
+        ) as old_zip, zipfile.ZipFile(
+            tmpdir / "test_export_modified.zip",
+            "w",
+        ) as new_zip:
+            for member in old_zip.infolist():
+                if member.filename != ".bh-target-metadata":
+                    new_zip.writestr(member, old_zip.read(member.filename))
         with pytest.raises(TargetImportError):
-            import_target(env, tmpdir / "test_export_modified.tar.gz")
+            import_target(env, tmpdir / "test_export_modified.zip")
 
 
 def test_local_target_import_invalid_metadata_archive() -> None:
@@ -54,16 +59,16 @@ def test_local_target_import_invalid_metadata_archive() -> None:
     target = Target(env, Path("/usr/bin/true"))
     with tempfile.TemporaryDirectory() as raw_tmpdir:
         tmpdir = Path(raw_tmpdir)
-        export_target(target, tmpdir / "test_export.tar.gz")
-        with tarfile.open(tmpdir / "test_export.tar.gz", "r") as old_tar, tarfile.open(
-            tmpdir / "test_export_modified.tar.gz",
-            "w:gz",
-        ) as new_tar:
-            for member in old_tar.getmembers():
-                if member.name != ".envanalysis-metadata":
-                    new_tar.addfile(member, old_tar.extractfile(member))
-                bad_metadata = tarfile.TarInfo(".envanalysis-metadata")
-                bad_metadata.type = tarfile.DIRTYPE
-                new_tar.addfile(bad_metadata)
+        export_target(target, tmpdir / "test_export.zip")
+        with zipfile.ZipFile(
+            tmpdir / "test_export.zip", "r"
+        ) as old_zip, zipfile.ZipFile(
+            tmpdir / "test_export_modified.zip",
+            "w",
+        ) as new_zip:
+            for info in old_zip.infolist():
+                if info.filename != ".bh-target-metadata":
+                    new_zip.writestr(info.filename, old_zip.read(info))
+            new_zip.writestr(".bh-target-metadata/", "")
         with pytest.raises(TargetImportError):
-            import_target(env, tmpdir / "test_export_modified.tar.gz")
+            import_target(env, tmpdir / "test_export_modified.zip")
