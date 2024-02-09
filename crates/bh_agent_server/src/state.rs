@@ -184,7 +184,7 @@ impl BhAgentState {
         if proc.stderr.is_some() {
             trace!("Saving stderr for process {}", proc_id);
             let file_id = self.take_file_id()?;
-            self.proc_stdout_ids.write()?.insert(proc_id, file_id);
+            self.proc_stderr_ids.write()?.insert(proc_id, file_id);
             self.file_modes.write()?.insert(file_id, FileOpenMode::Read);
             self.file_types
                 .write()?
