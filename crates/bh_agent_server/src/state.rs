@@ -292,13 +292,33 @@ impl BhAgentState {
 
     pub fn close_file(&self, fd: &FileId) -> Result<(), AgentError> {
         trace!("Closing file {}", fd);
-        drop(
-            self.files
-                .write()?
-                .remove(fd)
-                .ok_or(InvalidFileDescriptor)?,
-        );
-        Ok(())
+        let files_remove = self.files.write()?.remove(fd);
+        if let Some(file) = files_remove {
+            drop(file);
+            return Ok(());
+        }
+        let stdin_remove = self.proc_stdin_ids.write()?.remove_by_right(fd);
+        if let Some((pid, _)) = stdin_remove {
+            let procs_binding = self.processes.read()?;
+            let mut proc_binding = procs_binding.get(&pid).unwrap().write()?;
+            drop(proc_binding.stdin.take());
+            return Ok(());
+        }
+        let stdout_remove = self.proc_stdout_ids.write()?.remove_by_right(fd);
+        if let Some((pid, _)) = stdout_remove {
+            let procs_binding = self.processes.read()?;
+            let mut proc_binding = procs_binding.get(&pid).unwrap().write()?;
+            drop(proc_binding.stdout.take());
+            return Ok(());
+        }
+        let stderr_remove = self.proc_stderr_ids.write()?.remove_by_right(fd);
+        if let Some((pid, _)) = stderr_remove {
+            let procs_binding = self.processes.read()?;
+            let mut proc_binding = procs_binding.get(&pid).unwrap().write()?;
+            drop(proc_binding.stderr.take());
+            return Ok(());
+        }
+        Err(InvalidFileDescriptor)
     }
 
     pub fn is_file_closed(&self, fd: &FileId) -> Result<bool, AgentError> {
