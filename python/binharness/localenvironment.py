@@ -110,24 +110,18 @@ class LocalProcess(Process):
         )
 
     @property
-    def stdin(self: LocalProcess) -> IO[bytes]:
+    def stdin(self: LocalProcess) -> IO[bytes] | None:
         """Get the standard input stream of the process."""
-        if self.popen.stdin is None:
-            raise ValueError  # pragma: no cover
         return self.popen.stdin
 
     @property
-    def stdout(self: LocalProcess) -> IO[bytes]:
+    def stdout(self: LocalProcess) -> IO[bytes] | None:
         """Get the standard output stream of the process."""
-        if self.popen.stdout is None:
-            raise ValueError  # pragma: no cover
         return self.popen.stdout
 
     @property
-    def stderr(self: LocalProcess) -> IO[bytes]:
+    def stderr(self: LocalProcess) -> IO[bytes] | None:
         """Get the standard error stream of the process."""
-        if self.popen.stderr is None:
-            raise ValueError  # pragma: no cover
         return self.popen.stderr
 
     @property

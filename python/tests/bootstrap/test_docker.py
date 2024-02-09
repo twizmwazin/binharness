@@ -27,6 +27,7 @@ def test_bootstrap_env_from_image(
 
         proc.wait()
         assert proc.returncode == 0
+        assert proc.stdout is not None
         assert proc.stdout.read() == b"hello world\n"
     finally:
         agent.container.kill()

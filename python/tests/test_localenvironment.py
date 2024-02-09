@@ -43,6 +43,7 @@ def test_stdout() -> None:
     busybox = BusyboxInjection()
     busybox.install(env)
     proc = busybox.shell("echo hello")
+    assert proc.stdout is not None
     assert proc.stdout.read() == b"hello\n"
 
 
@@ -52,6 +53,7 @@ def test_stderr() -> None:
     busybox = BusyboxInjection()
     busybox.install(env)
     proc = busybox.shell("echo hello 1>&2")
+    assert proc.stderr is not None
     assert proc.stderr.read() == b"hello\n"
 
 
@@ -62,8 +64,10 @@ def test_process_poll() -> None:
     busybox.install(env)
     proc = busybox.run("head")
     assert proc.poll() is None
+    assert proc.stdin is not None
     proc.stdin.write(b"hello\n")
     proc.stdin.close()
     proc.wait()
     assert proc.poll() is not None
+    assert proc.stdout is not None
     assert proc.stdout.read() == b"hello\n"

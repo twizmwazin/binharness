@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from os import environ
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from binharness.types import InjectableExecutor, Target
 from binharness.types.injection import ExecutableInjection
@@ -48,7 +48,8 @@ class BusyboxInjection(ExecutableInjection):
         """Run mktemp in the environment and returns the Path created."""
         proc = self.run("mktemp", "-d") if directory else self.run("mktemp")
         stdout, _ = proc.communicate()
-        return Path(stdout.decode().strip())
+        # TODO: Find out how to not cast
+        return Path(cast(bytes, stdout).decode().strip())
 
     def shell(
         self: BusyboxInjection, command: str, env: dict[str, str] | None = None
