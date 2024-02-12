@@ -44,11 +44,18 @@ jobs:
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
-        run: cd crates/bh_agent_server && cross build --target ${{ matrix.targets }}
+        run: cross build -p bh_agent_server --release --target ${{ matrix.targets }}
+      - name: Prepare artifact
+        run: mkdir dist && cp target/${{ matrix.targets }}/release/bh_agent_server dist/bh_agent_server-${{ matrix.targets }}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bh_agent_server-${{ matrix.targets }}
+          path: dist/bh_agent_server-${{ matrix.targets }}
 
   build_server_macos:
     name: Build server (macOS)
-    runs-on: macos-12
+    runs-on: macos-14
     strategy:
         fail-fast: false
         matrix:
@@ -62,6 +69,13 @@ jobs:
         run: rustup target add ${{ matrix.targets }}
       - name: Build
         run: cd crates/bh_agent_server && cargo build --target ${{ matrix.targets }}
+      - name: Prepare artifact
+        run: mkdir dist && cp target/${{ matrix.targets }}/release/bh_agent_server dist/bh_agent_server-${{ matrix.targets }}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bh_agent_server-${{ matrix.targets }}
+          path: dist/bh_agent_server-${{ matrix.targets }}
 
   test_python:
     runs-on: ubuntu-22.04
