@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Run cargo check
         run: cargo check --all --all-targets --workspace
       - name: Run cargo fmt check
@@ -40,7 +40,7 @@ jobs:
             - x86_64-pc-windows-gnu
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -57,7 +57,7 @@ jobs:
             - x86_64-apple-darwin
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install target
         run: rustup target add ${{ matrix.targets }}
       - name: Build
@@ -72,7 +72,7 @@ jobs:
     name: Tests on Python ${{ matrix.python-version }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install host binaries
         run: sudo apt-get update && sudo apt-get install -y busybox-static qemu-user-static
       - name: Install cross
