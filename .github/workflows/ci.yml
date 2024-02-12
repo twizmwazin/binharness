@@ -46,12 +46,16 @@ jobs:
       - name: Build
         run: cross build -p bh_agent_server --release --target ${{ matrix.targets }}
       - name: Prepare artifact
+        if: not(contains(${{ matrix.targets }}, "windows"))
         run: mkdir dist && cp target/${{ matrix.targets }}/release/bh_agent_server dist/bh_agent_server-${{ matrix.targets }}
+      - name: Prepare artifact (Windows)
+        if: not(contains(${{ matrix.targets }}, "windows"))
+        run: mkdir dist && cp target/${{ matrix.targets }}/release/bh_agent_server.exe dist/bh_agent_server-${{ matrix.targets }}.exe
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: bh_agent_server-${{ matrix.targets }}
-          path: dist/bh_agent_server-${{ matrix.targets }}
+          path: dist/bh_agent_server-${{ matrix.targets }}*
 
   build_server_macos:
     name: Build server (macOS)
@@ -68,7 +72,7 @@ jobs:
       - name: Install target
         run: rustup target add ${{ matrix.targets }}
       - name: Build
-        run: cd crates/bh_agent_server && cargo build --target ${{ matrix.targets }}
+        run: cross build -p bh_agent_server --release --target ${{ matrix.targets }}
       - name: Prepare artifact
         run: mkdir dist && cp target/${{ matrix.targets }}/release/bh_agent_server dist/bh_agent_server-${{ matrix.targets }}
       - name: Upload artifact
