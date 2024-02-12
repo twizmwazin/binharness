@@ -90,10 +90,10 @@ class ExecutableInjection(Injection):
     @property
     def executable(self: ExecutableInjection) -> Path:
         """Return the executable path."""
-        if self.host_path is not None:
+        if self.env_path is not None:
             if self._executable is None:
-                return self.host_path
-            return self.host_path / self._executable
+                return self.env_path
+            return self.env_path / self._executable
         raise InjectionNotInstalledError
 
     def run(
