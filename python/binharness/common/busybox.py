@@ -28,7 +28,7 @@ class BusyboxInjection(ExecutableInjection):
 
     def install(self: BusyboxInjection, environment: Environment) -> None:
         """Install the injection into an environment."""
-        self.env_path = environment.get_tempdir()
+        self.env_path = environment.get_tempdir() / "busybox"
         try:
             super().install(environment)
         except OSError as ex:
