@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import stat
 from functools import cached_property
 from pathlib import Path
 from typing import Sequence, cast
@@ -203,26 +204,42 @@ class AgentEnvironment(Environment):
     def inject_files(self: AgentEnvironment, files: list[tuple[Path, Path]]) -> None:
         """Inject files into the environment."""
         for src, dst in files:
-            self.run_command(
-                "mkdir",  # TODO: Native mkdir function
-                "-p",
-                str(dst.parent),
-            ).wait()
-            fd = self._client.file_open(self._id, str(dst), "wb")
+            # TODO: Need a more robust solution to this. Current solution fixes
+            #  the common case where we're injecting into the system temp dir,
+            #  which presumably already exists.
+            try:
+                self.stat(dst.parent)
+            except RuntimeError:
+                self.run_command(
+                    "mkdir",  # TODO: Native mkdir function
+                    "-p",
+                    str(dst.parent),
+                ).wait()
+            try:
+                dst_stat = self.stat(dst)
+            except RuntimeError:
+                dst_stat = None
+            if dst_stat and stat.S_ISDIR(dst_stat.mode):
+                adjusted_dst = dst / src.name
+            else:
+                adjusted_dst = dst
+            fd = self._client.file_open(self._id, str(adjusted_dst), "wb")
             with src.open("rb") as f:
                 while chunk := f.read(4194304):  # 4MB
                     self._client.file_write(self._id, fd, chunk)
             self._client.file_close(self._id, fd)
             local_attrs = src.stat()
-            self.chmod(dst, local_attrs.st_mode)
+            self.chmod(adjusted_dst, local_attrs.st_mode)
 
     def retrieve_files(self: AgentEnvironment, files: list[tuple[Path, Path]]) -> None:
         """Retrieve files from the environment."""
         for src, dst in files:
             fd = self._client.file_open(self._id, str(src), "rb")
+            attrs = self.stat(src)
             with dst.open("wb") as f:
                 while chunk := self._client.file_read(self._id, fd, 4096):
                     f.write(chunk)
+            dst.chmod(attrs.mode)
 
     def get_tempdir(self: AgentEnvironment) -> Path:
         """Get a Path for a temporary directory."""
