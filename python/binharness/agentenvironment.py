@@ -235,9 +235,11 @@ class AgentEnvironment(Environment):
         """Retrieve files from the environment."""
         for src, dst in files:
             fd = self._client.file_open(self._id, str(src), "rb")
+            attrs = self.stat(src)
             with dst.open("wb") as f:
                 while chunk := self._client.file_read(self._id, fd, 4096):
                     f.write(chunk)
+            dst.chmod(attrs.mode)
 
     def get_tempdir(self: AgentEnvironment) -> Path:
         """Get a Path for a temporary directory."""
