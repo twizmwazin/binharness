@@ -4,15 +4,11 @@ from pathlib import Path
 
 import pytest
 
-from binharness import LocalEnvironment
+from binharness import Environment, NullExecutor, Target
 from binharness.common.busybox import BusyboxShellExecutor
-from binharness.types.executor import NullExecutor
-from binharness.types.target import Target
 
 
-@pytest.mark.linux()
-def test_run_target() -> None:
-    env = LocalEnvironment()
+def test_run_target(env: Environment) -> None:
     target = Target(env, Path("true"))
     executor = NullExecutor()
     proc = executor.run_target(target)
@@ -20,8 +16,7 @@ def test_run_target() -> None:
 
 
 @pytest.mark.linux()
-def test_run_target_busybox() -> None:
-    env = LocalEnvironment()
+def test_run_target_busybox(env: Environment) -> None:
     target = Target(env, Path("true"))
     executor = BusyboxShellExecutor()
     executor.install(env)

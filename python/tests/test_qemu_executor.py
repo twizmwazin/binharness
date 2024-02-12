@@ -4,13 +4,12 @@ from pathlib import Path
 
 import pytest
 
-from binharness import LocalEnvironment, Target
+from binharness import Environment, Target
 from binharness.common.qemu import QemuExecutor
 
 
 @pytest.mark.linux()
-def test_run_true() -> None:
-    env = LocalEnvironment()
+def test_run_true(env: Environment) -> None:
     target = Target(env, Path("/bin/true"))
     qemu = QemuExecutor()
     qemu.install(env)
@@ -18,8 +17,7 @@ def test_run_true() -> None:
 
 
 @pytest.mark.linux()
-def test_run_strace() -> None:
-    env = LocalEnvironment()
+def test_run_strace(env: Environment) -> None:
     target = Target(env, Path("/bin/true"))
     qemu = QemuExecutor()
     qemu.install(env)
