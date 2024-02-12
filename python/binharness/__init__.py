@@ -4,6 +4,7 @@ from __future__ import annotations
 
 __version__ = "0.1.0dev0"
 
+from binharness.agentprovider import AgentProvider, DevEnvironmentAgentProvider
 from binharness.common import BusyboxInjection
 from binharness.localenvironment import LocalEnvironment
 from binharness.serialize import TargetImportError, export_target, import_target
@@ -25,7 +26,9 @@ from binharness.types import (
 )
 
 __all__ = [
+    "AgentProvider",
     "BusyboxInjection",
+    "DevEnvironmentAgentProvider",
     "Environment",
     "ExecutableInjection",
     "Executor",
