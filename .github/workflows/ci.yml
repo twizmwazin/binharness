@@ -49,7 +49,7 @@ jobs:
         if: not(contains(${{ matrix.targets }}, "windows"))
         run: mkdir dist && cp target/${{ matrix.targets }}/release/bh_agent_server dist/bh_agent_server-${{ matrix.targets }}
       - name: Prepare artifact (Windows)
-        if: not(contains(${{ matrix.targets }}, "windows"))
+        if: contains(${{ matrix.targets }}, "windows")
         run: mkdir dist && cp target/${{ matrix.targets }}/release/bh_agent_server.exe dist/bh_agent_server-${{ matrix.targets }}.exe
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -72,7 +72,7 @@ jobs:
       - name: Install target
         run: rustup target add ${{ matrix.targets }}
       - name: Build
-        run: cross build -p bh_agent_server --release --target ${{ matrix.targets }}
+        run: cargo build -p bh_agent_server --release --target ${{ matrix.targets }}
       - name: Prepare artifact
         run: mkdir dist && cp target/${{ matrix.targets }}/release/bh_agent_server dist/bh_agent_server-${{ matrix.targets }}
       - name: Upload artifact
