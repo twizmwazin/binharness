@@ -85,7 +85,7 @@ jobs:
           path: dist/bh_agent_server-${{ matrix.targets }}
 
   build_wheels:
-    name: Build wheels on ${{ matrix.os }}
+    name: Build wheels on ${{ matrix.os }} for Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -103,6 +103,13 @@ jobs:
         with:
           command: build
           args: --release -i python${{ matrix.python-version }}
+          manylinux: auto
+      - name: Build wheels (x86_64 macOS)
+        if: matrix.os == 'macos-14'
+        uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          args: --release -i python${{ matrix.python-version }} --target universal2-apple-darwin
           manylinux: auto
       - uses: actions/upload-artifact@v4
         with:
