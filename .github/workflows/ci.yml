@@ -105,7 +105,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: wheels-${{ matrix.os }}-${{ strategy.job-index }}
-          path: ./dist/*.whl
+          path: ./wheels/*.whl
 
   test_python:
     runs-on: ubuntu-22.04
