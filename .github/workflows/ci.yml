@@ -46,11 +46,13 @@ jobs:
       - name: Build
         run: cross build -p bh_agent_server --release --target ${{ matrix.targets }}
       - name: Prepare artifact
-        if: not(contains(${{ matrix.targets }}, "windows"))
-        run: mkdir dist && cp target/${{ matrix.targets }}/release/bh_agent_server dist/bh_agent_server-${{ matrix.targets }}
-      - name: Prepare artifact (Windows)
-        if: contains(${{ matrix.targets }}, "windows")
-        run: mkdir dist && cp target/${{ matrix.targets }}/release/bh_agent_server.exe dist/bh_agent_server-${{ matrix.targets }}.exe
+        run: |
+          mkdir -p dist
+          if [[ "${{ matrix.targets }}" == *"windows"* ]]; then
+            cp target/${{ matrix.targets }}/release/bh_agent_server.exe dist/bh_agent_server-${{ matrix.targets }}.exe
+          else
+            cp target/${{ matrix.targets }}/release/bh_agent_server dist/bh_agent_server-${{ matrix.targets }}
+          fi
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
