@@ -89,8 +89,20 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, windows-2022, macos-14]
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        include:
+          - os: windows-2022
+            rust-target: ['x86_64-pc-windows-msvc', 'aarch64-pc-windows-msvc']
+          - os: macos-14
+            rust-target: ['x86_64-apple-darwin', 'aarch64-apple-darwin', 'universal2-apple-darwin']
+          - os: ubuntu-22.04
+            rust-target:
+              - 'x86_64-unknown-linux-gnu'
+              - 'i686-unknown-linux-gnu'
+              - 'aarch64-unknown-linux-gnu'
+              - 'armv7-unknown-linux-gnueabihf'
+              - 's390x-unknown-linux-gnu'
+              - 'powerpc64le-unknown-linux-gnu'
       fail-fast: false
     steps:
       - name: Checkout
@@ -102,18 +114,11 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: --release -i python${{ matrix.python-version }}
-          manylinux: auto
-      - name: Build wheels (x86_64 macOS)
-        if: matrix.os == 'macos-14'
-        uses: PyO3/maturin-action@v1
-        with:
-          command: build
-          args: --release -i python${{ matrix.python-version }} --target universal2-apple-darwin
+          args: --release -i python${{ matrix.python-version }} --target ${{ matrix.rust-target }}
           manylinux: auto
       - uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.os }}-${{ matrix.python-version }}
+          name: wheels-${{ matrix.rust-target }}-${{ matrix.python-version }}
           path: ./target/wheels/*.whl
 
   test_python:
