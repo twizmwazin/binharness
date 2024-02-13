@@ -74,7 +74,7 @@ impl From<nix::sys::stat::FileStat> for FileStat {
             mode: stat.st_mode as u16,
             uid: stat.st_uid,
             gid: stat.st_gid,
-            size: stat.st_size,
+            size: stat.st_size as i64,
             atime: stat.st_atime as i64,
             mtime: stat.st_mtime as i64,
             ctime: stat.st_ctime as i64,

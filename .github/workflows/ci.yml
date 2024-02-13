@@ -4,6 +4,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   cargo_checks:
@@ -83,6 +84,51 @@ jobs:
           name: bh_agent_server-${{ matrix.targets }}
           path: dist/bh_agent_server-${{ matrix.targets }}
 
+  build_wheels:
+    name: Build ${{matrix.rust-target }} wheels for Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        rust-target:
+          - 'x86_64-pc-windows-msvc'
+          - 'i686-pc-windows-msvc'
+          - 'x86_64-apple-darwin'
+          - 'aarch64-apple-darwin'
+          - 'x86_64-unknown-linux-gnu'
+          - 'i686-unknown-linux-gnu'
+          - 'aarch64-unknown-linux-gnu'
+          - 'armv7-unknown-linux-gnueabihf'
+          - 's390x-unknown-linux-gnu'
+          - 'powerpc64le-unknown-linux-gnu'
+        include:
+          - os: ubuntu-22.04
+          - os: windows-2022
+            rust-target: 'x86_64-pc-windows-msvc'
+          - os: windows-2022
+            rust-target: 'i686-pc-windows-msvc'
+          - os: macos-14
+            rust-target: 'x86_64-apple-darwin'
+          - os: macos-14
+            rust-target: 'aarch64-apple-darwin'
+      fail-fast: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup QEMU
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: docker/setup-qemu-action@v3
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          args: --release -i python${{ matrix.python-version }} --target ${{ matrix.rust-target }}
+          manylinux: auto
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.rust-target }}-${{ matrix.python-version }}
+          path: ./target/wheels/*.whl
+
   test_python:
     runs-on: ubuntu-22.04
     strategy:
@@ -102,7 +148,7 @@ jobs:
       - name: Build bh_agent_server x86_64-unknown-linux-musl
         run: cross build --target x86_64-unknown-linux-musl -p bh_agent_server
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install binharness
