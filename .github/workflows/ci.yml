@@ -4,6 +4,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   cargo_checks:
@@ -82,6 +83,23 @@ jobs:
         with:
           name: bh_agent_server-${{ matrix.targets }}
           path: dist/bh_agent_server-${{ matrix.targets }}
+
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-2022, macos-14]
+      fail-fast: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.16.5
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
 
   test_python:
     runs-on: ubuntu-22.04
