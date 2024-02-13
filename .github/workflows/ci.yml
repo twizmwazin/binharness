@@ -90,7 +90,20 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        rust-target:
+          - 'x86_64-pc-windows-msvc'
+          - 'aarch64-pc-windows-msvc'
+          - 'x86_64-apple-darwin'
+          - 'aarch64-apple-darwin'
+          - 'universal2-apple-darwin'
+          - 'x86_64-unknown-linux-gnu'
+          - 'i686-unknown-linux-gnu'
+          - 'aarch64-unknown-linux-gnu'
+          - 'armv7-unknown-linux-gnueabihf'
+          - 's390x-unknown-linux-gnu'
+          - 'powerpc64le-unknown-linux-gnu'
         include:
+          - os: ubuntu-22.04
           - os: windows-2022
             rust-target: 'x86_64-pc-windows-msvc'
           - os: windows-2022
@@ -101,18 +114,6 @@ jobs:
             rust-target: 'aarch64-apple-darwin'
           - os: macos-14
             rust-target: 'universal2-apple-darwin'
-          - os: ubuntu-22.04
-            rust-target: 'x86_64-unknown-linux-gnu'
-          - os: ubuntu-22.04
-            rust-target: 'i686-unknown-linux-gnu'
-          - os: ubuntu-22.04
-            rust-target: 'aarch64-unknown-linux-gnu'
-          - os: ubuntu-22.04
-            rust-target: 'armv7-unknown-linux-gnueabihf'
-          - os: ubuntu-22.04
-            rust-target: 's390x-unknown-linux-gnu'
-          - os: ubuntu-22.04
-            rust-target: 'powerpc64le-unknown-linux-gnu'
       fail-fast: false
     steps:
       - name: Checkout
