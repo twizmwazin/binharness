@@ -90,6 +90,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04, windows-2022, macos-14]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
       fail-fast: false
     steps:
       - name: Checkout
@@ -101,10 +102,11 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: --release
+          args: --release -i python${{ matrix.python-version }}
+          manylinux: auto
       - uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          name: wheels-${{ matrix.os }}-${{ matrix.python-version }}
           path: ./target/wheels/*.whl
 
   test_python:
