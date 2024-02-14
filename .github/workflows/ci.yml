@@ -84,6 +84,21 @@ jobs:
           name: bh_agent_server-${{ matrix.targets }}
           path: dist/bh_agent_server-${{ matrix.targets }}
 
+  build_sdist:
+    name: Build source distribution
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build sdist
+        uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: ./target/wheels/*.tar.gz
+
   build_wheels:
     name: Build ${{matrix.rust-target }} wheels for Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
