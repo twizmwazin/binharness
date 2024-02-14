@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__version__ = "0.1.0dev0"
+__version__ = "0.1.0"
 
 from binharness.agentenvironment import AgentConnection, AgentEnvironment
 from binharness.agentprovider import AgentProvider, DevEnvironmentAgentProvider
