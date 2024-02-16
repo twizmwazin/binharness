@@ -64,3 +64,7 @@ class IO(ContextManager["IO[AnyStr]"], Protocol[AnyStr]):
         """Exit the runtime context and close the file if it's open."""
         if not self.closed:
             self.close()
+
+    def set_blocking(self: IO[AnyStr], blocking: bool) -> None:  # noqa: FBT001
+        """Set the file to blocking or non-blocking mode."""
+        raise NotImplementedError

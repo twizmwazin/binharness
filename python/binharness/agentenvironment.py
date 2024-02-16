@@ -91,6 +91,10 @@ class AgentIO(IO[bytes]):
         """Write lines to the file."""
         self._client.file_write(self._environment_id, self._fd, b"\n".join(lines))
 
+    def set_blocking(self: AgentIO, blocking: bool) -> None:  # noqa: FBT001
+        """Set the file to non-blocking mode."""
+        self._client.file_set_blocking(self._environment_id, self._fd, blocking)
+
 
 class AgentProcess(Process):
     """A process running in an agent environment."""

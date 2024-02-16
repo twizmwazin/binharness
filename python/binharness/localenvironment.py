@@ -2,19 +2,93 @@
 
 from __future__ import annotations
 
+import fcntl
+import os
 import shutil
 import subprocess
 import tempfile
+import typing
 from pathlib import Path
-from typing import TYPE_CHECKING, AnyStr, Sequence
+from typing import AnyStr, Sequence
 
 from binharness.types.environment import Environment
+from binharness.types.io import IO
 from binharness.types.process import Process
 from binharness.types.stat import FileStat
 from binharness.util import normalize_args
 
-if TYPE_CHECKING:
-    from binharness.types.io import IO
+
+class LocalIO(IO[AnyStr]):
+    """A file-like object for the local environment."""
+
+    inner: typing.IO[AnyStr]
+
+    def __init__(self: LocalIO[AnyStr], inner: typing.IO[AnyStr]) -> None:
+        """Create a LocalIO."""
+        self.inner = inner
+
+    def close(self: LocalIO[AnyStr]) -> None:
+        """Close the file."""
+        return self.inner.close()
+
+    @property
+    def closed(self: LocalIO[AnyStr]) -> bool:
+        """Whether the file is closed."""
+        return self.inner.closed
+
+    def flush(self: LocalIO[AnyStr]) -> None:
+        """Flush the file."""
+        return self.inner.flush()
+
+    def read(self: LocalIO[AnyStr], n: int = -1) -> AnyStr:
+        """Read n bytes from the file."""
+        return self.inner.read(n)
+
+    def readable(self: LocalIO[AnyStr]) -> bool:
+        """Whether the file is readable."""
+        return self.inner.readable()
+
+    def readline(self: LocalIO[AnyStr], limit: int = -1) -> AnyStr:
+        """Read a line from the file."""
+        return self.inner.readline(limit)
+
+    def readlines(self: LocalIO[AnyStr], hint: int = -1) -> list[AnyStr]:
+        """Read lines from the file."""
+        return self.inner.readlines(hint)
+
+    def seek(self: LocalIO[AnyStr], offset: int, whence: int = 0) -> int | None:
+        """Seek to a position in the file."""
+        return self.inner.seek(offset, whence)
+
+    def seekable(self: LocalIO[AnyStr]) -> bool:
+        """Whether the file is seekable."""
+        return self.inner.seekable()
+
+    def tell(self: LocalIO[AnyStr]) -> int:
+        """Get the current position in the file."""
+        return self.inner.tell()
+
+    def writable(self: LocalIO[AnyStr]) -> bool:
+        """Whether the file is writable."""
+        return self.inner.writable()
+
+    def write(self: LocalIO[AnyStr], s: AnyStr) -> int | None:
+        """Write to the file."""
+        return self.inner.write(s)
+
+    def writelines(self: LocalIO[AnyStr], lines: list[AnyStr]) -> None:
+        """Write lines to the file."""
+        self.inner.writelines(lines)
+
+    def set_blocking(self: LocalIO[AnyStr], blocking: bool) -> None:  # noqa: FBT001
+        """Set the file to non-blocking mode."""
+        fd = self.inner.fileno()
+        flags = fcntl.fcntl(fd, fcntl.F_GETFL)
+        if blocking:
+            flags &= ~os.O_NONBLOCK
+        else:
+            flags |= os.O_NONBLOCK
+        fcntl.fcntl(fd, fcntl.F_SETFL, flags)
 
 
 class LocalEnvironment(Environment):
@@ -70,7 +144,7 @@ class LocalEnvironment(Environment):
 
     def open_file(self: Environment, path: Path, mode: str) -> IO[AnyStr]:
         """Open a file in the environment. Follows the same semantics as `open`."""
-        return Path.open(path, mode)
+        return LocalIO(Path.open(path, mode))
 
     def chown(self: Environment, path: Path, user: str, group: str) -> None:
         """Change the owner of a file."""

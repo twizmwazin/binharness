@@ -15,7 +15,7 @@ use bh_agent_common::{AgentError::*, UserId};
 use crate::state::BhAgentState;
 #[cfg(target_family = "unix")]
 use crate::util::{chmod, chown, stat};
-use crate::util::{read_generic, read_lines};
+use crate::util::{read_generic, read_lines, set_blocking};
 
 macro_rules! check_env_id {
     ($env_id:expr) => {
@@ -282,6 +282,23 @@ impl BhAgentService for BhAgentServer {
             self.state
                 .do_mut_operation(&fd, |file| file.write(&data))
                 .map(|_| ()),
+        )
+    }
+
+    type FileSetBlockingFut = Ready<Result<(), AgentError>>;
+    fn file_set_blocking(
+        self,
+        _: Context,
+        env_id: EnvironmentId,
+        fd: FileId,
+        blocking: bool,
+    ) -> Self::FileSetBlockingFut {
+        check_env_id!(env_id);
+
+        ready(
+            self.state.do_mut_operation(&fd, |file| {
+                set_blocking(file, blocking)
+            }).map(|_| ())
         )
     }
 
