@@ -14,7 +14,7 @@ use bh_agent_common::{AgentError::*, UserId};
 
 use crate::state::BhAgentState;
 #[cfg(target_family = "unix")]
-use crate::util::{chmod, chown, stat, set_blocking};
+use crate::util::{chmod, chown, set_blocking, stat};
 use crate::util::{read_generic, read_lines};
 
 macro_rules! check_env_id {
@@ -304,7 +304,6 @@ impl BhAgentService for BhAgentServer {
 
         #[cfg(not(target_family = "unix"))]
         return ready(Err(AgentError::UnsupportedPlatform));
-
     }
 
     type ChownFut = Ready<Result<(), AgentError>>;
