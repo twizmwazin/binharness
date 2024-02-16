@@ -26,6 +26,7 @@ class Environment(ABC):
         *args: Path | str | Sequence[Path | str],
         env: dict[str, str] | None = None,
         cwd: Path | None = None,
+        pty: bool = False,
     ) -> Process:
         """Run a command in the environment.
 
