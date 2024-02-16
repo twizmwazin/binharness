@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import fcntl
 import os
+import pty
 import shutil
 import subprocess
 import tempfile
@@ -108,6 +109,7 @@ class LocalEnvironment(Environment):
         *args: Path | str | Sequence[Path | str],
         env: dict[str, str] | None = None,
         cwd: Path | None = None,
+        pty: bool = False,
     ) -> Process:
         """Run a command in the environment.
 
@@ -115,7 +117,7 @@ class LocalEnvironment(Environment):
         subprocess is started with `subprocess.Popen` and the arguments are
         passed directly to that function.
         """
-        process = LocalProcess(self, normalize_args(*args), env=env, cwd=cwd)
+        process = LocalProcess(self, normalize_args(*args), env=env, cwd=cwd, use_pty=pty)
         self._managed_processes[process.pid] = process
         return process
 
@@ -188,25 +190,52 @@ class LocalProcess(Process):
     """A process running in a local environment."""
 
     popen: subprocess.Popen[bytes]
+    use_pty: bool
+    pty: IO[bytes] | None
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self: LocalProcess,
         environment: Environment,
         args: Sequence[str],
         env: dict[str, str] | None = None,
         cwd: Path | None = None,
+        use_pty: bool = False,  # noqa: FBT001,FBT002
     ) -> None:
         """Create a LocalProcess."""
-        super().__init__(environment, args, env=env, cwd=cwd)
-        self.popen = subprocess.Popen(
-            self.args,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+        super().__init__(
+            environment,
+            args,
             env=env,
             cwd=cwd,
-            universal_newlines=False,
         )
+        self.use_pty = use_pty
+
+        if use_pty:
+            parent_fd, child_fd = pty.openpty()
+            self.popen = subprocess.Popen(
+                self.args,
+                stdin=child_fd,
+                stdout=child_fd,
+                stderr=child_fd,
+                env=env,
+                cwd=cwd,
+                universal_newlines=False,
+                bufsize=0,
+            )
+            os.close(child_fd)
+            self.pty = LocalIO(os.fdopen(parent_fd, "r+b", buffering=0))
+        else:
+            self.pty = None
+            self.popen = subprocess.Popen(
+                self.args,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env=env,
+                cwd=cwd,
+                universal_newlines=False,
+                bufsize=0,
+            )
 
     @property
     def pid(self: LocalProcess) -> int:
@@ -216,6 +245,8 @@ class LocalProcess(Process):
     @property
     def stdin(self: LocalProcess) -> IO[bytes] | None:
         """Get the standard input stream of the process."""
+        if self.use_pty:
+            return self.pty
         if self.popen.stdin is not None:
             return LocalIO(self.popen.stdin)
         return None
@@ -223,6 +254,8 @@ class LocalProcess(Process):
     @property
     def stdout(self: LocalProcess) -> IO[bytes] | None:
         """Get the standard output stream of the process."""
+        if self.use_pty:
+            return self.pty
         if self.popen.stdout is not None:
             return LocalIO(self.popen.stdout)
         return None
@@ -230,6 +263,8 @@ class LocalProcess(Process):
     @property
     def stderr(self: LocalProcess) -> IO[bytes] | None:
         """Get the standard error stream of the process."""
+        if self.use_pty:
+            return self.pty
         if self.popen.stderr is not None:
             return LocalIO(self.popen.stderr)
         return None

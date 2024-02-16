@@ -58,3 +58,16 @@ class NullExecutor(Executor):
             *target.args,
             env=target.env,
         )
+
+
+class PtyExecutor(Executor):
+    """PtyExecutor is an Executor that runs the target in a pseudo-terminal."""
+
+    def run_target(self: PtyExecutor, target: Target) -> Process:
+        """Run a target in an environment with a pseudo-terminal."""
+        return target.environment.run_command(
+            target.main_binary,
+            *target.args,
+            env=target.env,
+            pty=True,
+        )
