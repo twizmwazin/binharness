@@ -14,7 +14,7 @@ use bh_agent_common::{AgentError::*, UserId};
 
 use crate::state::BhAgentState;
 #[cfg(target_family = "unix")]
-use crate::util::{chmod, chown, stat};
+use crate::util::{chmod, chown, set_blocking, stat};
 use crate::util::{read_generic, read_lines};
 
 macro_rules! check_env_id {
@@ -283,6 +283,27 @@ impl BhAgentService for BhAgentServer {
                 .do_mut_operation(&fd, |file| file.write(&data))
                 .map(|_| ()),
         )
+    }
+
+    type FileSetBlockingFut = Ready<Result<(), AgentError>>;
+    fn file_set_blocking(
+        self,
+        _: Context,
+        env_id: EnvironmentId,
+        fd: FileId,
+        blocking: bool,
+    ) -> Self::FileSetBlockingFut {
+        check_env_id!(env_id);
+
+        #[cfg(target_family = "unix")]
+        return ready(
+            self.state
+                .do_mut_operation(&fd, |file| set_blocking(file, blocking))
+                .map(|_| ()),
+        );
+
+        #[cfg(not(target_family = "unix"))]
+        return ready(Err(AgentError::UnsupportedPlatform));
     }
 
     type ChownFut = Ready<Result<(), AgentError>>;

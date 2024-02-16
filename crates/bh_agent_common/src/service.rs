@@ -87,6 +87,12 @@ pub trait BhAgentService {
     async fn file_write(env_id: EnvironmentId, fd: FileId, data: Vec<u8>)
         -> Result<(), AgentError>;
 
+    async fn file_set_blocking(
+        env_id: EnvironmentId,
+        fd: FileId,
+        blocking: bool,
+    ) -> Result<(), AgentError>;
+
     async fn chown(
         env_id: EnvironmentId,
         path: String,

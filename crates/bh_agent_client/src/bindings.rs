@@ -383,6 +383,19 @@ impl BhAgentClient {
         )
     }
 
+    fn file_set_blocking(&self, env_id: EnvironmentId, fd: FileId, blocking: bool) -> PyResult<()> {
+        debug!(
+            "Setting file blocking for environment {}, fd {}, blocking {}",
+            env_id, fd, blocking
+        );
+
+        run_in_runtime(
+            self,
+            self.client
+                .file_set_blocking(context::current(), env_id, fd, blocking),
+        )
+    }
+
     fn chown(
         &self,
         env_id: EnvironmentId,
