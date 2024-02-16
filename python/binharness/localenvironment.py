@@ -186,17 +186,23 @@ class LocalProcess(Process):
     @property
     def stdin(self: LocalProcess) -> IO[bytes] | None:
         """Get the standard input stream of the process."""
-        return self.popen.stdin
+        if self.popen.stdin is not None:
+            return LocalIO(self.popen.stdin)
+        return None
 
     @property
     def stdout(self: LocalProcess) -> IO[bytes] | None:
         """Get the standard output stream of the process."""
-        return self.popen.stdout
+        if self.popen.stdout is not None:
+            return LocalIO(self.popen.stdout)
+        return None
 
     @property
     def stderr(self: LocalProcess) -> IO[bytes] | None:
         """Get the standard error stream of the process."""
-        return self.popen.stderr
+        if self.popen.stderr is not None:
+            return LocalIO(self.popen.stderr)
+        return None
 
     @property
     def returncode(self: LocalProcess) -> int | None:
