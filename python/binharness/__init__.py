@@ -8,7 +8,12 @@ from binharness.agentenvironment import AgentConnection, AgentEnvironment
 from binharness.agentprovider import AgentProvider, DevEnvironmentAgentProvider
 from binharness.common import BusyboxInjection
 from binharness.localenvironment import LocalEnvironment
-from binharness.serialize import TargetImportError, export_target, import_target
+from binharness.serialize import (
+    TargetImportError,
+    export_target,
+    import_target,
+    transport_target,
+)
 from binharness.types import (
     IO,
     Environment,
@@ -50,4 +55,5 @@ __all__ = [
     "TargetImportError",
     "export_target",
     "import_target",
+    "transport_target",
 ]
