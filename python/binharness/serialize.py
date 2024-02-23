@@ -91,3 +91,10 @@ def import_target(environment: Environment, import_path: Path) -> Target:
             args,
             env,
         )
+
+
+def transport_target(target: Target, new_env: Environment) -> Target:
+    """Transport a target to a new environment by exporting and importing it."""
+    with tempfile.NamedTemporaryFile() as export_file:
+        export_target(target, Path(export_file.name))
+        return import_target(new_env, Path(export_file.name))
