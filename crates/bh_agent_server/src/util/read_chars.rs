@@ -10,10 +10,13 @@ use bh_agent_common::FileOpenType;
 #[cfg(target_family = "unix")]
 use crate::util::is_blocking;
 
-
 // This is uhhh... a bit messy. The error handling is the main issue that is
 //necessitating this inner function.
-pub fn read_generic(file: &mut File, mut n: Option<u32>, file_type: FileOpenType) -> Result<Vec<u8>> {
+pub fn read_generic(
+    file: &mut File,
+    mut n: Option<u32>,
+    file_type: FileOpenType,
+) -> Result<Vec<u8>> {
     trace!("Entering read_generic");
 
     #[cfg(target_family = "unix")]
@@ -23,7 +26,7 @@ pub fn read_generic(file: &mut File, mut n: Option<u32>, file_type: FileOpenType
 
     let inner: Result<Vec<u8>> = (|| {
         trace!("read_generic: entering inner closure...");
-        if let Some(num_bytes) = n{
+        if let Some(num_bytes) = n {
             match file_type {
                 FileOpenType::Binary => Ok(read_bytes(file, num_bytes as usize)?),
                 FileOpenType::Text => Ok(read_graphemes(file, num_bytes as usize)?),
@@ -35,7 +38,9 @@ pub fn read_generic(file: &mut File, mut n: Option<u32>, file_type: FileOpenType
     })();
     trace!("read_generic: processing inner result...");
     inner.or_else(|e| {
-        if let Some(std::io::ErrorKind::WouldBlock) = e.downcast_ref::<std::io::Error>().map(|e| e.kind()) {
+        if let Some(std::io::ErrorKind::WouldBlock) =
+            e.downcast_ref::<std::io::Error>().map(|e| e.kind())
+        {
             trace!("read_generic: WouldBlock error, returning empty vec");
             Ok(Vec::new())
         } else {
