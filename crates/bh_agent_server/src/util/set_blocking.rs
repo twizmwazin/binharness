@@ -3,7 +3,7 @@ use std::io;
 use std::os::unix::io::AsRawFd;
 
 // TODO: This is using libc directly, but nix has a wrapper for this. We should use that instead.
-pub fn set_blocking<T: AsRawFd>(fd: &T, blocking: bool) -> io::Result<()> {
+pub fn set_blocking(fd: &impl AsRawFd, blocking: bool) -> io::Result<()> {
     let raw_fd = fd.as_raw_fd();
     let flags = unsafe { fcntl(raw_fd, F_GETFL, 0) };
     if flags < 0 {
@@ -21,4 +21,14 @@ pub fn set_blocking<T: AsRawFd>(fd: &T, blocking: bool) -> io::Result<()> {
     }
 
     Ok(())
+}
+
+pub fn is_blocking(fd: &impl AsRawFd) -> io::Result<bool> {
+    let raw_fd = fd.as_raw_fd();
+    let flags = unsafe { fcntl(raw_fd, F_GETFL, 0) };
+    if flags < 0 {
+        return Err(io::Error::last_os_error());
+    }
+
+    Ok(flags & O_NONBLOCK == 0)
 }
