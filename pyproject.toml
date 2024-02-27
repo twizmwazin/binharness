@@ -42,6 +42,7 @@ python-source = "python"
 python-packages = ["binharness"]
 strip = true
 sdist-generator = "cargo"
+features = ["pyo3/extension-module"]
 
 [tool.pytest.ini_options]
 addopts = "-ra --cov=binharness --cov-report lcov:.lcov --cov-report term-missing --mypy"
