@@ -7,13 +7,13 @@ edition = "2021"
 
 [dependencies]
 anyhow = { version = "1.0.75", features = [] }
-tarpc = { version = "0.33.0", features = ["tokio1"] }
+tarpc = { version = "0.34.0", features = ["tokio1"] }
 serde = { version = "1.0.188", features = ["derive"] }
 thiserror = "1.0.48"
-pyo3 = { version = "0.19.0", optional = true }
+pyo3 = { version = "0.20.3", optional = true }
 
 [target.'cfg(target_family = "unix")'.dependencies]
-nix = { version = "0.27.1", features = ["fs", "user"] }
+nix = { version = "0.28.0", features = ["fs", "user"] }
 
 [features]
 python = ["pyo3"]

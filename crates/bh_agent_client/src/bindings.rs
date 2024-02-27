@@ -85,10 +85,10 @@ impl BhAgentClient {
         cwd: Option<String>,
         setuid: Option<u32>,
         setgid: Option<u32>,
-        setpgid: bool,
+        setpgid: Option<bool>,
     ) -> PyResult<ProcessId> {
         debug!(
-            "Running process with argv {:?}, stdin {}, stdout {}, stderr {}, executable {:?}, env {:?}, cwd {:?}, setuid {:?}, setgid {:?}, setpgid {}",
+            "Running process with argv {:?}, stdin {}, stdout {}, stderr {}, executable {:?}, env {:?}, cwd {:?}, setuid {:?}, setgid {:?}, setpgid {:?}",
             argv,
             stdin,
             stdout,
@@ -119,7 +119,7 @@ impl BhAgentClient {
             cwd,
             setuid,
             setgid,
-            setpgid,
+            setpgid: setpgid.unwrap_or(false),
         };
         run_in_runtime(
             self,

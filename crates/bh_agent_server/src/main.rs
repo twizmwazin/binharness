@@ -26,6 +26,10 @@ struct Args {
     daemonize: bool,
 }
 
+async fn spawn(fut: impl Future<Output = ()> + Send + 'static) {
+    tokio::spawn(fut);
+}
+
 fn main() -> anyhow::Result<()> {
     env_logger::init();
     let args = argh::from_env::<Args>();
@@ -62,7 +66,7 @@ fn main() -> anyhow::Result<()> {
             // the generated World trait.
             .map(|channel| {
                 let server = BhAgentServer::new(channel.transport().peer_addr().unwrap());
-                channel.execute(server.serve())
+                channel.execute(server.serve()).for_each(spawn)
             })
             // Max 10 channels.
             .buffer_unordered(10)
