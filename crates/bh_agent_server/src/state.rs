@@ -153,11 +153,8 @@ impl BhAgentState {
                 .map_err(|e| ProcessStartFailure(e.to_string()))?
                 .into_os_string();
         }
-        let proc = Popen::create(
-            &argv,
-            popenconfig,
-        )
-        .map_err(|e| ProcessStartFailure(e.to_string()))?;
+        let proc =
+            Popen::create(&argv, popenconfig).map_err(|e| ProcessStartFailure(e.to_string()))?;
 
         let proc_id = self.take_proc_id()?;
 
