@@ -1,13 +1,14 @@
 use bimap::BiMap;
 use log::{debug, trace};
 use std::collections::HashMap;
-use std::ffi::OsStr;
+use std::ffi::OsString;
 use std::fs::{File, OpenOptions};
 use std::sync::{Arc, RwLock};
 use std::thread::sleep;
 use std::time::Duration;
 
 use subprocess::{Popen, PopenConfig};
+use which::which;
 
 use bh_agent_common::AgentError::{
     InvalidFileDescriptor, InvalidProcessId, IoError, ProcessStartFailure, Unknown,
@@ -127,7 +128,10 @@ impl BhAgentState {
                 Redirection::Save => subprocess::Redirection::Pipe,
             },
             detached: false,
-            executable: config.executable.map(|s| s.into()),
+            executable: config
+                .executable
+                .and_then(|s| which(&s).ok())
+                .map(|s| s.into()),
             env: config.env.map(|v| {
                 v.iter()
                     .map(|t| (t.0.clone().into(), t.1.clone().into()))
@@ -143,13 +147,14 @@ impl BhAgentState {
             popenconfig.setpgid = config.setpgid || popenconfig.setpgid;
         }
 
+        let mut argv: Vec<OsString> = config.argv.iter().map(OsString::from).collect();
+        if !argv.is_empty() {
+            argv[0] = which(&argv[0])
+                .map_err(|e| ProcessStartFailure(e.to_string()))?
+                .into_os_string();
+        }
         let proc = Popen::create(
-            config
-                .argv
-                .iter()
-                .map(OsStr::new)
-                .collect::<Vec<_>>()
-                .as_slice(),
+            &argv,
             popenconfig,
         )
         .map_err(|e| ProcessStartFailure(e.to_string()))?;

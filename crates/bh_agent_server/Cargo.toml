@@ -17,6 +17,7 @@ env_logger = { version = "0.11.2", default-features = false, features = ["auto-c
 bimap = "0.6.3"
 argh = "0.1.12"
 unicode_reader = "1.0.2"
+which = "6.0.0"
 
 [target.'cfg(target_family = "unix")'.dependencies]
 daemonize = "0.5.0"

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 import time
 from typing import TYPE_CHECKING
@@ -30,8 +31,7 @@ class SubprocessAgent(AgentConnection):
         """Create an AgentConnection."""
         process = subprocess.Popen(
             [str(agent_binary), address, str(port)],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            env={**os.environ, "RUST_LOG": "bh_agent_server::util::read_chars=trace"},
         )
         self._process = process
         time.sleep(0.1)
