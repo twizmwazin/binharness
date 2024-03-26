@@ -119,6 +119,11 @@ class AgentProcess(Process):
         self._env_id = env_id
         self._pid = pid
 
+    @property
+    def pid(self: AgentProcess) -> int:
+        """Get the process' PID."""
+        return self._pid
+
     @cached_property
     def stdin(self: AgentProcess) -> AgentIO | None:
         """Get the standard input stream of the process."""
@@ -204,6 +209,16 @@ class AgentEnvironment(Environment):
             env,
             cwd,
         )
+
+    def get_process_ids(self: AgentEnvironment) -> list[int]:
+        """Get the PIDs of all processes managed by binharness in the environment."""
+        return self._client.get_process_ids(self._id)
+
+    def get_process(self: AgentEnvironment, pid: int) -> Process:
+        """Get a process by PID."""
+        # TODO: These last three arguments are a lie. We need to store these on
+        # the agent at the time of process creation, and then retrieve them here.
+        return AgentProcess(self._client, self._id, pid, self, [], None, None)
 
     def inject_files(self: AgentEnvironment, files: list[tuple[Path, Path]]) -> None:
         """Inject files into the environment."""

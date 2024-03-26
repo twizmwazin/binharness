@@ -35,6 +35,16 @@ class Environment(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def get_process_ids(self: Environment) -> list[int]:
+        """Get the PIDs of all processes managed by binharness in the environment."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_process(self: Environment, pid: int) -> Process:
+        """Get a process by PID."""
+        raise NotImplementedError
+
+    @abstractmethod
     def inject_files(
         self: Environment,
         files: list[tuple[Path, Path]],

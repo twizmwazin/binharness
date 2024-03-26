@@ -94,9 +94,12 @@ class LocalIO(IO[AnyStr]):
 class LocalEnvironment(Environment):
     """A local environment is the environment local to where binharness is run."""
 
+    _managed_processes: dict[int, LocalProcess]
+
     def __init__(self: LocalEnvironment) -> None:
         """Create a LocalEnvironment."""
         super().__init__()
+        self._managed_processes = {}
 
     def run_command(
         self: LocalEnvironment,
@@ -110,7 +113,17 @@ class LocalEnvironment(Environment):
         subprocess is started with `subprocess.Popen` and the arguments are
         passed directly to that function.
         """
-        return LocalProcess(self, normalize_args(*args), env=env, cwd=cwd)
+        process = LocalProcess(self, normalize_args(*args), env=env, cwd=cwd)
+        self._managed_processes[process.pid] = process
+        return process
+
+    def get_process_ids(self: LocalEnvironment) -> list[int]:
+        """Get the PIDs of all processes managed by binharness in the environment."""
+        return list(self._managed_processes.keys())
+
+    def get_process(self: LocalEnvironment, pid: int) -> Process:
+        """Get a process by PID."""
+        return self._managed_processes[pid]
 
     def inject_files(
         self: LocalEnvironment,
@@ -182,6 +195,11 @@ class LocalProcess(Process):
             cwd=cwd,
             universal_newlines=False,
         )
+
+    @property
+    def pid(self: LocalProcess) -> int:
+        """Get the process' PID."""
+        return self.popen.pid
 
     @property
     def stdin(self: LocalProcess) -> IO[bytes] | None:

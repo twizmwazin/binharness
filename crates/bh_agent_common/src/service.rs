@@ -18,6 +18,8 @@ pub trait BhAgentService {
         config: RemotePOpenConfig,
     ) -> Result<ProcessId, AgentError>;
 
+    async fn get_process_ids(env_id: EnvironmentId) -> Result<Vec<ProcessId>, AgentError>;
+
     async fn get_process_channel(
         env_id: EnvironmentId,
         proc_id: ProcessId,
