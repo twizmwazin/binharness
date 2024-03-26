@@ -10,7 +10,7 @@ use pyo3::prelude::*;
 use pyo3::types::PyBytes;
 use pyo3::{pyclass, pymethods, pymodule, PyResult, Python};
 use std::future::Future;
-use std::net::{IpAddr, SocketAddr};
+use std::net::{IpAddr, SocketAddr, ToSocketAddrs};
 use std::str::FromStr;
 use tarpc::client::RpcError;
 use tarpc::context;
@@ -37,11 +37,23 @@ where
 #[pymethods]
 impl BhAgentClient {
     #[staticmethod]
-    fn initialize_client(ip_addr: String, port: u16) -> PyResult<Self> {
-        debug!("Initializing client with {}:{}", ip_addr, port);
+    fn initialize_client(host: String, port: u16) -> PyResult<Self> {
+        debug!("Initializing client with {}:{}", host, port);
 
-        let ip_addr = IpAddr::from_str(&ip_addr)?;
-        let socket_addr = SocketAddr::new(ip_addr, port);
+        let socket_addr = match format!("{}:{}", host, port).to_socket_addrs() {
+            Ok(mut addrs) => match addrs.next() {
+                Some(addr) => addr,
+                None => {
+                    return Err(PyRuntimeError::new_err("Failed to resolve address"));
+                }
+            },
+            Err(e) => {
+                return Err(PyRuntimeError::new_err(format!(
+                    "Failed to resolve address: {}",
+                    e
+                )));
+            }
+        };
 
         let tokio_runtime = runtime::Builder::new_current_thread()
             .enable_all()
