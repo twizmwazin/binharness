@@ -93,3 +93,18 @@ class Environment(ABC):
     def stat(self: Environment, path: Path) -> FileStat:
         """Get the stat of a file."""
         raise NotImplementedError
+
+    # Metadata API
+    # Binharness environments have a simple key-value store applications can use
+    # to persistantly store metadata about processes and files, or any other
+    # information they need to persist between runs.
+
+    @abstractmethod
+    def get_metadata(self: Environment, key: str) -> str | None:
+        """Get a metadata value."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def set_metadata(self: Environment, key: str, value: str) -> None:
+        """Set a metadata value."""
+        raise NotImplementedError

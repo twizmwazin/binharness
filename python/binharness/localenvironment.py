@@ -95,11 +95,13 @@ class LocalEnvironment(Environment):
     """A local environment is the environment local to where binharness is run."""
 
     _managed_processes: dict[int, LocalProcess]
+    _metadata: dict[str, str]
 
     def __init__(self: LocalEnvironment) -> None:
         """Create a LocalEnvironment."""
         super().__init__()
         self._managed_processes = {}
+        self._metadata = {}
 
     def run_command(
         self: LocalEnvironment,
@@ -170,6 +172,16 @@ class LocalEnvironment(Environment):
     def stat(self: Environment, path: Path) -> FileStat:
         """Get the stat of a file."""
         return FileStat.from_os(path.stat())
+
+    # Metadata API
+
+    def get_metadata(self: LocalEnvironment, key: str) -> str | None:
+        """Get a metadata value."""
+        return self._metadata.get(key, None)
+
+    def set_metadata(self: LocalEnvironment, key: str, value: str) -> None:
+        """Set a metadata value."""
+        self._metadata[key] = value
 
 
 class LocalProcess(Process):

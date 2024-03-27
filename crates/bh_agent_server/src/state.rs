@@ -27,6 +27,7 @@ pub struct BhAgentState {
     proc_stdin_ids: RwLock<BiMap<ProcessId, FileId>>,
     proc_stdout_ids: RwLock<BiMap<ProcessId, FileId>>,
     proc_stderr_ids: RwLock<BiMap<ProcessId, FileId>>,
+    metadata: RwLock<HashMap<String, String>>,
 
     next_file_id: RwLock<FileId>,
     next_process_id: RwLock<ProcessId>,
@@ -42,6 +43,7 @@ impl BhAgentState {
             proc_stdin_ids: RwLock::new(BiMap::new()),
             proc_stdout_ids: RwLock::new(BiMap::new()),
             proc_stderr_ids: RwLock::new(BiMap::new()),
+            metadata: RwLock::new(HashMap::new()),
 
             next_file_id: RwLock::new(0),
             next_process_id: RwLock::new(0),
@@ -372,5 +374,14 @@ impl BhAgentState {
         }
 
         Err(InvalidFileDescriptor)
+    }
+
+    pub fn get_metadata(&self, key: &String) -> Result<Option<String>, AgentError> {
+        Ok(self.metadata.read()?.get(key).cloned())
+    }
+
+    pub fn set_metadata(&self, key: &String, value: &String) -> Result<(), AgentError> {
+        self.metadata.write()?.insert(key.clone(), value.clone());
+        Ok(())
     }
 }
