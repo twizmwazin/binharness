@@ -62,7 +62,11 @@ impl BhAgentService for BhAgentServer {
         self.state.run_command(config)
     }
 
-    async fn get_process_ids(self, _: Context, env_id: EnvironmentId) -> Result<Vec<ProcessId>, AgentError> {
+    async fn get_process_ids(
+        self,
+        _: Context,
+        env_id: EnvironmentId,
+    ) -> Result<Vec<ProcessId>, AgentError> {
         check_env_id!(env_id);
 
         self.state.get_process_ids()

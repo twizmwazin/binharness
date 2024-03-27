@@ -142,7 +142,10 @@ impl BhAgentClient {
     fn get_process_ids(&self, env_id: EnvironmentId) -> PyResult<Vec<ProcessId>> {
         debug!("Getting process ids for environment {}", env_id);
 
-        run_in_runtime(self, self.client.get_process_ids(context::current(), env_id))
+        run_in_runtime(
+            self,
+            self.client.get_process_ids(context::current(), env_id),
+        )
     }
 
     fn get_process_channel(
