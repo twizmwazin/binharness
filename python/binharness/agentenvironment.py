@@ -282,6 +282,16 @@ class AgentEnvironment(Environment):
         """Get the stat of a file."""
         return FileStat.from_agent(self._client.stat(self._id, str(path)))
 
+    # Metadata API
+
+    def get_metadata(self: AgentEnvironment, key: str) -> str | None:
+        """Get a metadata value."""
+        return self._client.get_metadata(self._id, key)
+
+    def set_metadata(self: AgentEnvironment, key: str, value: str) -> None:
+        """Set a metadata value."""
+        self._client.set_metadata(self._id, key, value)
+
 
 class AgentConnection:
     """AgentConnection represents a connection to an agent.

@@ -462,6 +462,28 @@ impl BhAgentClient {
 
         run_in_runtime(self, self.client.stat(context::current(), env_id, path))
     }
+
+    // Metadata API
+    fn get_metadata(&self, env_id: EnvironmentId, key: String) -> PyResult<Option<String>> {
+        debug!("Getting metadata for environment {}, key {}", env_id, key);
+        run_in_runtime(
+            self,
+            self.client.get_metadata(context::current(), env_id, key),
+        )
+    }
+
+    fn set_metadata(&self, env_id: EnvironmentId, key: String, value: String) -> PyResult<()> {
+        debug!(
+            "Setting metadata for environment {}, key {}, value {}",
+            env_id, key, value
+        );
+
+        run_in_runtime(
+            self,
+            self.client
+                .set_metadata(context::current(), env_id, key, value),
+        )
+    }
 }
 
 #[pymodule]

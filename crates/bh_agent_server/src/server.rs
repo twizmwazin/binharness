@@ -342,4 +342,27 @@ impl BhAgentService for BhAgentServer {
         #[cfg(not(target_family = "unix"))]
         return Err(AgentError::UnsupportedPlatform);
     }
+
+    async fn get_metadata(
+        self,
+        _: Context,
+        env_id: EnvironmentId,
+        key: String,
+    ) -> Result<Option<String>, AgentError> {
+        check_env_id!(env_id);
+
+        self.state.get_metadata(&key)
+    }
+
+    async fn set_metadata(
+        self,
+        _: Context,
+        env_id: EnvironmentId,
+        key: String,
+        value: String,
+    ) -> Result<(), AgentError> {
+        check_env_id!(env_id);
+
+        self.state.set_metadata(&key, &value)
+    }
 }
