@@ -28,6 +28,7 @@ from binharness.types import (
     InjectionNotInstalledError,
     NullExecutor,
     Process,
+    PtyExecutor,
     Target,
 )
 
@@ -51,6 +52,7 @@ __all__ = [
     "LocalEnvironment",
     "NullExecutor",
     "Process",
+    "PtyExecutor",
     "Target",
     "TargetImportError",
     "export_target",
