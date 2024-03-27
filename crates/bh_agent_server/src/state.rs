@@ -203,6 +203,10 @@ impl BhAgentState {
         Ok(proc_id)
     }
 
+    pub fn get_process_ids(&self) -> Result<Vec<ProcessId>, AgentError> {
+        Ok(self.processes.read()?.keys().cloned().collect())
+    }
+
     pub fn get_process_channel(
         &self,
         proc_id: &ProcessId,

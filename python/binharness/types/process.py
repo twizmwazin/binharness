@@ -34,6 +34,11 @@ class Process(ABC):
         self.cwd = cwd or environment.get_tempdir()
 
     @abstractproperty
+    def pid(self: Process) -> int:
+        """Get the process' PID."""
+        raise NotImplementedError
+
+    @abstractproperty
     def stdin(self: Process) -> IO[bytes] | None:
         """Get the standard input stream of the process."""
         raise NotImplementedError
