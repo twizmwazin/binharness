@@ -107,7 +107,8 @@ pub trait BhAgentService {
     async fn stat(env_id: EnvironmentId, path: String) -> Result<FileStat, AgentError>;
 
     // Metadata API
-    async fn get_metadata(env_id: EnvironmentId, key: String) -> Result<Option<String>, AgentError>;
+    async fn get_metadata(env_id: EnvironmentId, key: String)
+        -> Result<Option<String>, AgentError>;
 
     async fn set_metadata(
         env_id: EnvironmentId,
