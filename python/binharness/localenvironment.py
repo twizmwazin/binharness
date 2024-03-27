@@ -117,7 +117,9 @@ class LocalEnvironment(Environment):
         subprocess is started with `subprocess.Popen` and the arguments are
         passed directly to that function.
         """
-        process = LocalProcess(self, normalize_args(*args), env=env, cwd=cwd, use_pty=pty)
+        process = LocalProcess(
+            self, normalize_args(*args), env=env, cwd=cwd, use_pty=pty
+        )
         self._managed_processes[process.pid] = process
         return process
 
