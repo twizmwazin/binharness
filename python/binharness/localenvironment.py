@@ -4,19 +4,26 @@ from __future__ import annotations
 
 import fcntl
 import os
-import pty
 import shutil
 import subprocess
 import tempfile
 import typing
 from pathlib import Path
-from typing import AnyStr, Sequence
+from typing import AnyStr, Callable, Sequence
 
 from binharness.types.environment import Environment
 from binharness.types.io import IO
 from binharness.types.process import Process
 from binharness.types.stat import FileStat
 from binharness.util import normalize_args
+
+openpty: Callable[[], tuple[int, int]] | None
+try:
+    import pty
+
+    openpty = pty.openpty
+except ImportError:
+    openpty = None
 
 
 class LocalIO(IO[AnyStr]):
@@ -117,7 +124,9 @@ class LocalEnvironment(Environment):
         subprocess is started with `subprocess.Popen` and the arguments are
         passed directly to that function.
         """
-        process = LocalProcess(self, normalize_args(*args), env=env, cwd=cwd, use_pty=pty)
+        process = LocalProcess(
+            self, normalize_args(*args), env=env, cwd=cwd, use_pty=pty
+        )
         self._managed_processes[process.pid] = process
         return process
 
@@ -210,8 +219,8 @@ class LocalProcess(Process):
         )
         self.use_pty = use_pty
 
-        if use_pty:
-            parent_fd, child_fd = pty.openpty()
+        if openpty and use_pty:
+            parent_fd, child_fd = openpty()
             self.popen = subprocess.Popen(
                 self.args,
                 stdin=child_fd,
