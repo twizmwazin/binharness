@@ -3,6 +3,7 @@ use log::{debug, trace};
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::fs::{File, OpenOptions};
+use std::rc::Rc;
 use std::sync::{Arc, RwLock};
 use std::thread::sleep;
 use std::time::Duration;
@@ -116,19 +117,15 @@ impl BhAgentState {
     }
 
     pub fn run_command(&self, config: RemotePOpenConfig) -> Result<ProcessId, AgentError> {
+        let select_io = |redirection: &Redirection| match (redirection, &config.use_pty) {
+            (Redirection::None, _) => subprocess::Redirection::None,
+            (Redirection::Save, false) => subprocess::Redirection::Pipe,
+            (Redirection::Save, true) => subprocess::Redirection::Pty,
+        };
         let mut popenconfig = PopenConfig {
-            stdin: match config.stdin {
-                Redirection::None => subprocess::Redirection::None,
-                Redirection::Save => subprocess::Redirection::Pipe,
-            },
-            stdout: match config.stdout {
-                Redirection::None => subprocess::Redirection::None,
-                Redirection::Save => subprocess::Redirection::Pipe,
-            },
-            stderr: match config.stderr {
-                Redirection::None => subprocess::Redirection::None,
-                Redirection::Save => subprocess::Redirection::Pipe,
-            },
+            stdin: select_io(&config.stdin),
+            stdout: select_io(&config.stdout),
+            stderr: select_io(&config.stderr),
             detached: false,
             executable: config
                 .executable
@@ -160,42 +157,32 @@ impl BhAgentState {
 
         let proc_id = self.take_proc_id()?;
 
+        let save_io = |io: &Option<File>,
+                       io_map: &RwLock<BiMap<ProcessId, FileId>>,
+                       name: &str,
+                       write: bool|
+         -> Result<(), AgentError> {
+            if io.is_some() {
+                trace!("Saving {} for process {}", name, proc_id);
+                let file_id = self.take_file_id()?;
+                io_map.write()?.insert(proc_id, file_id);
+                if write {
+                    self.file_modes
+                        .write()?
+                        .insert(file_id, FileOpenMode::Write);
+                }
+                self.file_types
+                    .write()?
+                    .insert(file_id, FileOpenType::Binary);
+            } else {
+                trace!("Process {} has no {}", proc_id, name);
+            }
+            Ok(())
+        };
         // Stick the process channels into the file map
-        if proc.stdin.is_some() {
-            trace!("Saving stdin for process {}", proc_id);
-            let file_id = self.take_file_id()?;
-            self.proc_stdin_ids.write()?.insert(proc_id, file_id);
-            self.file_modes
-                .write()?
-                .insert(file_id, FileOpenMode::Write);
-            self.file_types
-                .write()?
-                .insert(file_id, FileOpenType::Binary);
-        } else {
-            trace!("Process {} has no stdin", proc_id);
-        }
-        if proc.stdout.is_some() {
-            trace!("Saving stdout for process {}", proc_id);
-            let file_id = self.take_file_id()?;
-            self.proc_stdout_ids.write()?.insert(proc_id, file_id);
-            self.file_modes.write()?.insert(file_id, FileOpenMode::Read);
-            self.file_types
-                .write()?
-                .insert(file_id, FileOpenType::Binary);
-        } else {
-            trace!("Process {} has no stdout", proc_id);
-        }
-        if proc.stderr.is_some() {
-            trace!("Saving stderr for process {}", proc_id);
-            let file_id = self.take_file_id()?;
-            self.proc_stderr_ids.write()?.insert(proc_id, file_id);
-            self.file_modes.write()?.insert(file_id, FileOpenMode::Read);
-            self.file_types
-                .write()?
-                .insert(file_id, FileOpenType::Binary);
-        } else {
-            trace!("Process {} has no stderr", proc_id);
-        }
+        save_io(&proc.stdin, &self.proc_stdin_ids, "stdin", true)?;
+        save_io(&proc.stdout, &self.proc_stdout_ids, "stdout", false)?;
+        save_io(&proc.stderr, &self.proc_stderr_ids, "stderr", false)?;
 
         // Move the proc to the process map
         self.processes
