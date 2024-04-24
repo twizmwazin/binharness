@@ -183,6 +183,7 @@ class AgentEnvironment(Environment):
         *args: Path | str | Sequence[Path | str],
         env: dict[str, str] | None = None,
         cwd: Path | None = None,
+        pty: bool = False,
     ) -> AgentProcess:
         """Run a command in the environment."""
         normalized_args = list(normalize_args(*args))
@@ -199,6 +200,7 @@ class AgentEnvironment(Environment):
             setuid=None,
             setgid=None,
             setpgid=False,
+            use_pty=pty,
         )
         return AgentProcess(
             self._client,

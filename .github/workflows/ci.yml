@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Run cargo check
         run: cargo check --all --all-targets --workspace
       - name: Run cargo fmt check
@@ -43,6 +45,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -73,6 +77,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Install target
         run: rustup target add ${{ matrix.targets }}
       - name: Build
@@ -91,6 +97,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Build sdist
         uses: PyO3/maturin-action@v1
         with:
@@ -131,6 +139,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Setup QEMU
         if: startsWith(matrix.os, 'ubuntu')
         uses: docker/setup-qemu-action@v3
@@ -155,6 +165,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Install host binaries
         run: sudo apt-get update && sudo apt-get install -y busybox-static qemu-user-static
       - name: Install cross

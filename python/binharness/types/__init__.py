@@ -9,6 +9,7 @@ from binharness.types.executor import (
     ExecutorError,
     InjectableExecutor,
     NullExecutor,
+    PtyExecutor,
 )
 from binharness.types.injection import (
     ExecutableInjection,
@@ -35,5 +36,6 @@ __all__ = [
     "InjectionNotInstalledError",
     "NullExecutor",
     "Process",
+    "PtyExecutor",
     "Target",
 ]

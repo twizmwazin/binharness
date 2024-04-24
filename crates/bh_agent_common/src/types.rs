@@ -32,6 +32,7 @@ pub struct RemotePOpenConfig {
     pub setuid: Option<u32>,
     pub setgid: Option<u32>,
     pub setpgid: bool,
+    pub use_pty: bool,
 }
 
 #[derive(Copy, Clone, Debug, Serialize, Deserialize, PartialEq)]
