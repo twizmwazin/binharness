@@ -5,7 +5,7 @@ from __future__ import annotations
 import stat
 from functools import cached_property
 from pathlib import Path
-from typing import Sequence, cast
+from typing import TYPE_CHECKING, cast
 
 from bh_agent_client import BhAgentClient
 
@@ -14,6 +14,9 @@ from binharness.types.io import IO
 from binharness.types.process import Process
 from binharness.types.stat import FileStat
 from binharness.util import normalize_args
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 
 class AgentIO(IO[bytes]):

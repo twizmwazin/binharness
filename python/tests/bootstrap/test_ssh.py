@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING
 
 import mockssh
 import pytest
@@ -11,6 +11,8 @@ from binharness.types.executor import NullExecutor
 from binharness.types.target import Target
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from paramiko import SSHClient
 
 SAMPLE_USER_KEY = str(Path(mockssh.__file__).parent / "sample-user-key")

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import platform
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator, cast
+from typing import TYPE_CHECKING, cast
 
 from binharness.types.executor import InjectableExecutor
 from binharness.types.injection import ExecutableInjection
@@ -12,6 +12,8 @@ from binharness.types.io import IO
 from binharness.util import generate_random_suffix, read_lines
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from binharness import Process, Target
 
 
