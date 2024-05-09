@@ -42,12 +42,13 @@ def test_local_target_import_without_metadata(env: Environment) -> None:
     with tempfile.TemporaryDirectory() as raw_tmpdir:
         tmpdir = Path(raw_tmpdir)
         export_target(target, tmpdir / "test_export.zip")
-        with zipfile.ZipFile(
-            tmpdir / "test_export.zip", "r"
-        ) as old_zip, zipfile.ZipFile(
-            tmpdir / "test_export_modified.zip",
-            "w",
-        ) as new_zip:
+        with (
+            zipfile.ZipFile(tmpdir / "test_export.zip", "r") as old_zip,
+            zipfile.ZipFile(
+                tmpdir / "test_export_modified.zip",
+                "w",
+            ) as new_zip,
+        ):
             for member in old_zip.infolist():
                 if member.filename != ".bh-target-metadata":
                     new_zip.writestr(member, old_zip.read(member.filename))
@@ -60,12 +61,13 @@ def test_local_target_import_invalid_metadata_archive(env: Environment) -> None:
     with tempfile.TemporaryDirectory() as raw_tmpdir:
         tmpdir = Path(raw_tmpdir)
         export_target(target, tmpdir / "test_export.zip")
-        with zipfile.ZipFile(
-            tmpdir / "test_export.zip", "r"
-        ) as old_zip, zipfile.ZipFile(
-            tmpdir / "test_export_modified.zip",
-            "w",
-        ) as new_zip:
+        with (
+            zipfile.ZipFile(tmpdir / "test_export.zip", "r") as old_zip,
+            zipfile.ZipFile(
+                tmpdir / "test_export_modified.zip",
+                "w",
+            ) as new_zip,
+        ):
             for info in old_zip.infolist():
                 if info.filename != ".bh-target-metadata":
                     new_zip.writestr(info.filename, old_zip.read(info))

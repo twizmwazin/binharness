@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, AnyStr, ContextManager, Protocol
+from contextlib import AbstractContextManager
+from typing import TYPE_CHECKING, AnyStr, Protocol
 
 if TYPE_CHECKING:
     from types import TracebackType
 
 
-class IO(ContextManager["IO[AnyStr]"], Protocol[AnyStr]):
+class IO(AbstractContextManager["IO[AnyStr]"], Protocol[AnyStr]):
     """A file-like object."""
 
     def close(self: IO[AnyStr]) -> None:

@@ -26,9 +26,10 @@ def export_target(target: Target, export_path: Path) -> None:
 
     This function is the inverse of import_target.
     """
-    with tempfile.TemporaryDirectory() as raw_tmpdir, zipfile.ZipFile(
-        export_path, "w"
-    ) as archive:
+    with (
+        tempfile.TemporaryDirectory() as raw_tmpdir,
+        zipfile.ZipFile(export_path, "w") as archive,
+    ):
         tmpdir = Path(raw_tmpdir)
         target.environment.retrieve_files(
             [
@@ -52,9 +53,10 @@ def import_target(environment: Environment, import_path: Path) -> Target:
 
     This function is the inverse of export_target.
     """
-    with tempfile.TemporaryDirectory() as raw_tempdir, zipfile.ZipFile(
-        import_path
-    ) as zip_file:
+    with (
+        tempfile.TemporaryDirectory() as raw_tempdir,
+        zipfile.ZipFile(import_path) as zip_file,
+    ):
         tmpdir = Path(raw_tempdir)
         try:
             metadata_io = zip_file.read(_META_FILENAME)

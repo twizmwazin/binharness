@@ -3,7 +3,7 @@ from __future__ import annotations
 import platform
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -12,6 +12,8 @@ from binharness.bootstrap.subprocess import SubprocessAgent
 from binharness.localenvironment import LocalEnvironment
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from binharness.agentenvironment import AgentEnvironment
     from binharness.types.environment import Environment
 

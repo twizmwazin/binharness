@@ -9,13 +9,16 @@ import subprocess
 import tempfile
 import typing
 from pathlib import Path
-from typing import AnyStr, Sequence
+from typing import AnyStr
 
 from binharness.types.environment import Environment
 from binharness.types.io import IO
 from binharness.types.process import Process
 from binharness.types.stat import FileStat
 from binharness.util import normalize_args
+
+if typing.TYPE_CHECKING:
+    from collections.abc import Sequence
 
 
 class LocalIO(IO[AnyStr]):

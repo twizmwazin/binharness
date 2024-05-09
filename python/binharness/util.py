@@ -6,9 +6,11 @@ import random
 import shlex
 import string
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator, Sequence
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from collections.abc import Generator, Sequence
+
     from binharness.types.io import IO
 
 
@@ -20,9 +22,9 @@ def normalize_args(*args: Path | str | Sequence[Path | str]) -> Sequence[str]:
 
     flattened_args: list[str] = []
     for arg in args:
-        if isinstance(arg, (str, Path)):
+        if isinstance(arg, str | Path):
             flattened_args.append(str(arg))
-        elif isinstance(arg, (list, set, tuple)):
+        elif isinstance(arg, list | set | tuple):
             flattened_args.extend(str(a) for a in arg)
     return flattened_args
 
