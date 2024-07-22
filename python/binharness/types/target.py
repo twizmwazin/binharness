@@ -19,7 +19,7 @@ class Target:
     args: list[str]
     env: dict[str, str]
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self: Target,
         environment: Environment,
         main_binary: Path,
