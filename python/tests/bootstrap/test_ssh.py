@@ -18,14 +18,14 @@ if TYPE_CHECKING:
 SAMPLE_USER_KEY = str(Path(mockssh.__file__).parent / "sample-user-key")
 
 
-@pytest.fixture()
+@pytest.fixture
 def ssh_server() -> Generator[mockssh.Server, None, None]:
     users = {"test": SAMPLE_USER_KEY}
     with mockssh.Server(users) as s:
         yield s
 
 
-@pytest.fixture()
+@pytest.fixture
 def ssh_client(ssh_server: mockssh.Server) -> SSHClient:
     return ssh_server.client(0)  # type: ignore[no-any-return]
 

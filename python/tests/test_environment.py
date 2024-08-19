@@ -39,7 +39,7 @@ def test_get_tempdir(local_env: Environment) -> None:
 
 
 # TODO: Need to think about how to test these with non-linux environments
-@pytest.mark.linux()
+@pytest.mark.linux
 def test_stdout(env: Environment) -> None:
     busybox = BusyboxInjection()
     busybox.install(env)
@@ -48,7 +48,7 @@ def test_stdout(env: Environment) -> None:
     assert proc.stdout.read() == b"hello\n"
 
 
-@pytest.mark.linux()
+@pytest.mark.linux
 def test_stderr(env: Environment) -> None:
     busybox = BusyboxInjection()
     busybox.install(env)
@@ -57,7 +57,7 @@ def test_stderr(env: Environment) -> None:
     assert proc.stderr.read() == b"hello\n"
 
 
-@pytest.mark.linux()
+@pytest.mark.linux
 def test_process_poll(env: Environment) -> None:
     busybox = BusyboxInjection()
     busybox.install(env)

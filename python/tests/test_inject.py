@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from binharness.types.environment import Environment
 
 
-@pytest.mark.linux()
+@pytest.mark.linux
 def test_inject_true(env: Environment) -> None:
     true_injection = Injection(Path("/usr/bin/true"))
     true_injection.install(env)
@@ -25,7 +25,7 @@ def test_inject_true(env: Environment) -> None:
     assert stat.S_ISREG(env.stat(true_injection.env_path).mode)
 
 
-@pytest.mark.linux()
+@pytest.mark.linux
 def test_inject_true_executable(env: Environment) -> None:
     true_injection = ExecutableInjection(Path("/usr/bin/true"))
     true_injection.install(env)
@@ -36,7 +36,7 @@ def test_inject_true_executable(env: Environment) -> None:
     assert true_injection.run().wait() == 0
 
 
-@pytest.mark.linux()
+@pytest.mark.linux
 def test_inject_true_executable_twice(env: Environment) -> None:
     true_injection = ExecutableInjection(Path("/usr/bin/true"))
     true_injection.install(env)
@@ -44,7 +44,7 @@ def test_inject_true_executable_twice(env: Environment) -> None:
         true_injection.install(env)
 
 
-@pytest.mark.linux()
+@pytest.mark.linux
 def test_inject_two_true_executables(env: Environment) -> None:
     true_injection_1 = ExecutableInjection(Path("/usr/bin/true"))
     true_injection_1.install(env)

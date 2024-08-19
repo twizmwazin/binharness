@@ -78,7 +78,7 @@ def local_env() -> LocalEnvironment:
 
 
 @pytest.fixture(scope="session")
-@pytest.mark.linux()
+@pytest.mark.linux
 def linux_local_env() -> LocalEnvironment:
     return LocalEnvironment()
 
@@ -91,7 +91,7 @@ def agent_env(agent_binary_host: str) -> Generator[AgentEnvironment, None, None]
 
 
 @pytest.fixture(scope="session")
-@pytest.mark.docker()
+@pytest.mark.docker
 def docker_client() -> docker.DockerClient:
     try:
         client = docker.from_env()
