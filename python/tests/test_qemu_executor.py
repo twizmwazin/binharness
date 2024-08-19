@@ -8,7 +8,7 @@ from binharness import Environment, Target
 from binharness.common.qemu import QemuExecutor
 
 
-@pytest.mark.linux()
+@pytest.mark.linux
 def test_run_true(env: Environment) -> None:
     target = Target(env, Path("/bin/true"))
     qemu = QemuExecutor()
@@ -16,7 +16,7 @@ def test_run_true(env: Environment) -> None:
     assert qemu.run_target(target).wait() == 0
 
 
-@pytest.mark.linux()
+@pytest.mark.linux
 def test_run_strace(env: Environment) -> None:
     target = Target(env, Path("/bin/true"))
     qemu = QemuExecutor()

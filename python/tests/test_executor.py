@@ -14,7 +14,7 @@ from binharness import (
 from binharness.common.busybox import BusyboxShellExecutor
 
 
-@pytest.mark.linux()
+@pytest.mark.linux
 def test_busybox_injection_without_install(env: Environment) -> None:
     target = Target(env, Path("/usr/bin/true"))
     busybox_shell = BusyboxShellExecutor()
@@ -23,7 +23,7 @@ def test_busybox_injection_without_install(env: Environment) -> None:
 
 
 # TODO: Maybe LocalEnvironment objects should be interchangable?
-@pytest.mark.linux()
+@pytest.mark.linux
 def test_busybox_injection_different_environment() -> None:
     env1 = LocalEnvironment()
     env2 = LocalEnvironment()

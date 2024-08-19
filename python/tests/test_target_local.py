@@ -15,7 +15,7 @@ def test_run_target(env: Environment) -> None:
     assert proc.wait() == 0
 
 
-@pytest.mark.linux()
+@pytest.mark.linux
 def test_run_target_busybox(env: Environment) -> None:
     target = Target(env, Path("true"))
     executor = BusyboxShellExecutor()
