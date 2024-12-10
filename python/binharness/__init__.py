@@ -32,6 +32,7 @@ from binharness.types import (
 )
 
 __all__ = [
+    "IO",
     "AgentConnection",
     "AgentEnvironment",
     "AgentProvider",
@@ -42,7 +43,6 @@ __all__ = [
     "Executor",
     "ExecutorEnvironmentMismatchError",
     "ExecutorError",
-    "IO",
     "InjectableExecutor",
     "Injection",
     "InjectionAlreadyInstalledError",

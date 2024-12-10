@@ -74,7 +74,6 @@ ignore = [
     "TD002",
     "TD003",
 ]
-ignore-init-module-imports = true
 
 [tool.ruff.lint.isort]
 known-first-party = ["binharness"]

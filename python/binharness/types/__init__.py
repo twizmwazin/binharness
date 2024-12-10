@@ -22,12 +22,12 @@ from binharness.types.process import Process
 from binharness.types.target import Target
 
 __all__ = [
+    "IO",
     "Environment",
     "ExecutableInjection",
     "Executor",
     "ExecutorEnvironmentMismatchError",
     "ExecutorError",
-    "IO",
     "InjectableExecutor",
     "Injection",
     "InjectionAlreadyInstalledError",
