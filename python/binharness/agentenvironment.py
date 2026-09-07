@@ -166,7 +166,7 @@ class AgentProcess(Process):
     def wait(self: AgentProcess, timeout: float | None = None) -> int:
         """Wait for the process to terminate and return its exit code."""
         if not self._client.process_wait(self._env_id, self._pid, timeout):
-            return cast(int, self.returncode)
+            return cast("int", self.returncode)
         raise TimeoutError
 
 

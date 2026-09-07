@@ -55,7 +55,7 @@ class QemuInjection(ExecutableInjection):
 
         def log_generator() -> Generator[bytes, None, None]:
             file = self.environment.open_file(logfile, "rb")
-            yield from read_lines(cast(IO[bytes], file))
+            yield from read_lines(cast("IO[bytes]", file))
 
             # Cleanup log file
             self.environment.run_command("rm", logfile)

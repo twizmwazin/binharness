@@ -49,7 +49,7 @@ class BusyboxInjection(ExecutableInjection):
         proc = self.run("mktemp", "-d") if directory else self.run("mktemp")
         stdout, _ = proc.communicate()
         # TODO: Find out how to not cast
-        return Path(cast(bytes, stdout).decode().strip())
+        return Path(cast("bytes", stdout).decode().strip())
 
     def shell(
         self: BusyboxInjection, command: str, env: dict[str, str] | None = None
